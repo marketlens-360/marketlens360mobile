@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "1006258054322",
+    "project_id": "marketlens360dev",
+    "storage_bucket": "marketlens360dev.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1006258054322:android:816e50d6ac81532a7315ab",
+        "android_client_info": {
+          "package_name": "com.marketlens.marketlens360mobile.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1006258054322-qd1k5r38as0tn1guepcaeit4rac3h86r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.marketlens.marketlens360mobile.dev",
+            "certificate_hash": "2c64bde6679c4ae253d6ad187fb89530727cf945"
+          }
+        },
+        {
+          "client_id": "1006258054322-dvcnokum6vntste815jmueh99l75hcvc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBYKmw81g6FYFMtYsvK0_rstgYa-SBXR5c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1006258054322-dvcnokum6vntste815jmueh99l75hcvc.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1006258054322-73i32mbg0s087dj0gcvsdeeg7qbmaa9j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.marketlens.marketlens360mobile.dev"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
