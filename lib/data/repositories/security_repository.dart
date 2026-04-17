@@ -63,7 +63,7 @@ class SecurityRepository {
     String? endDate,
   }) async {
     try {
-      final res = await _dio.get<List<dynamic>>(
+      final res = await _dio.get<Map<String, dynamic>>(
         ApiEndpoints.priceHistory(symbol),
         queryParameters: {
           if (period != null) 'period': period,
@@ -71,7 +71,8 @@ class SecurityRepository {
           if (endDate != null) 'end_date': endDate,
         },
       );
-      return (res.data ?? [])
+      final data = (res.data?['data'] as List<dynamic>?) ?? [];
+      return data
           .map((e) => PriceHistory.fromJson(e as Map<String, dynamic>))
           .toList();
     } on DioException catch (e) {
@@ -98,8 +99,9 @@ class SecurityRepository {
 
   Future<List<Earnings>> getEarnings(String symbol) async {
     try {
-      final res = await _dio.get<List<dynamic>>(ApiEndpoints.earnings(symbol));
-      return (res.data ?? [])
+      final res = await _dio.get<Map<String, dynamic>>(ApiEndpoints.earnings(symbol));
+      final data = (res.data?['data'] as List<dynamic>?) ?? [];
+      return data
           .map((e) => Earnings.fromJson(e as Map<String, dynamic>))
           .toList();
     } on DioException catch (e) {
@@ -156,8 +158,17 @@ class SecurityRepository {
 
   Future<List<MarketIndex>> getIndices() async {
     try {
-      final res = await _dio.get<List<dynamic>>(ApiEndpoints.indices);
-      return (res.data ?? [])
+      final res = await _dio.get<dynamic>(ApiEndpoints.indices);
+      final raw = res.data;
+      final List<dynamic> items;
+      if (raw is Map<String, dynamic>) {
+        items = (raw['data'] as List<dynamic>?) ?? [];
+      } else if (raw is List<dynamic>) {
+        items = raw;
+      } else {
+        items = [];
+      }
+      return items
           .map((e) => MarketIndex.fromJson(e as Map<String, dynamic>))
           .toList();
     } on DioException catch (e) {
@@ -174,13 +185,22 @@ class SecurityRepository {
     String? period,
   }) async {
     try {
-      final res = await _dio.get<List<dynamic>>(
+      final res = await _dio.get<dynamic>(
         ApiEndpoints.indexHistory(code),
         queryParameters: {
           if (period != null) 'period': period,
         },
       );
-      return (res.data ?? [])
+      final raw = res.data;
+      final List<dynamic> items;
+      if (raw is Map<String, dynamic>) {
+        items = (raw['data'] as List<dynamic>?) ?? [];
+      } else if (raw is List<dynamic>) {
+        items = raw;
+      } else {
+        items = [];
+      }
+      return items
           .map((e) => MarketIndex.fromJson(e as Map<String, dynamic>))
           .toList();
     } on DioException catch (e) {

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marketlens360mobile/core/theme/app_colors.dart';
 import 'package:marketlens360mobile/core/theme/app_spacing.dart';
 import 'package:marketlens360mobile/core/theme/app_text_styles.dart';
+import 'package:marketlens360mobile/core/widgets/app_bars.dart';
 import 'package:marketlens360mobile/core/widgets/app_card.dart';
 import 'package:marketlens360mobile/services/icon_service.dart';
 
@@ -28,26 +29,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
 
     return Scaffold(
       backgroundColor: c.background,
-      appBar: AppBar(
-        backgroundColor: c.background,
-        leading: Builder(
-          builder: (ctx) => IconButton(
-            icon: Icon(IconService.menu, size: 22, color: c.textSecondary),
-            onPressed: () => Scaffold.of(ctx).openDrawer(),
-          ),
-        ),
-        title: Text('MarketLens360', style: AppTextStyles.titleSm.copyWith(color: c.primary)),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: CircleAvatar(
-              radius: 16,
-              backgroundColor: c.surfaceContainer,
-              child: Icon(IconService.profile, size: 16, color: c.primary),
-            ),
-          ),
-        ],
-      ),
+      appBar: const AppShellBar(),
       body: Column(
         children: [
           Expanded(

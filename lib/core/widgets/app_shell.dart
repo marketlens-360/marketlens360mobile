@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:marketlens360mobile/core/providers/scaffold_providers.dart';
 import 'package:marketlens360mobile/core/router/app_routes.dart';
 import 'package:marketlens360mobile/core/theme/app_colors.dart';
 import 'package:marketlens360mobile/core/theme/app_spacing.dart';
 import 'package:marketlens360mobile/core/theme/app_text_styles.dart';
+import 'package:marketlens360mobile/features/auth/providers/auth_providers.dart';
 import 'package:marketlens360mobile/services/icon_service.dart';
 
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.child});
 
   final Widget child;
@@ -35,13 +38,15 @@ class AppShell extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scaffoldKey  = ref.watch(shellScaffoldKeyProvider);
     final location     = GoRouterState.of(context).matchedLocation;
     final currentIndex = _currentIndex(location);
     final c            = AppColors.of(context);
     final isDark       = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      key: scaffoldKey,
       drawer: _AppDrawer(),
       body: child,
       bottomNavigationBar: Container(
@@ -171,12 +176,20 @@ class _NavItem extends StatelessWidget {
 }
 
 // ── Drawer ────────────────────────────────────────────────────────────────────
-class _AppDrawer extends StatelessWidget {
+class _AppDrawer extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    final c = AppColors.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c        = AppColors.of(context);
+    final isDark   = Theme.of(context).brightness == Brightness.dark;
     final location = GoRouterState.of(context).matchedLocation;
+    final userAsync = ref.watch(authStateProvider);
+
+    final user     = userAsync.value;
+
+    final displayName = user?.displayName ?? 'MarketLens User';
+    final email       = user?.email ?? '';
+    final photoUrl    = user?.photoURL;
+    final initials    = _initials(displayName);
 
     return Drawer(
       backgroundColor: isDark ? c.surface : c.surfaceContainerLowest,
@@ -188,52 +201,63 @@ class _AppDrawer extends StatelessWidget {
           children: [
             // ── User header ──────────────────────────────────────────────────
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
               child: Row(
                 children: [
+                  // Avatar
                   Container(
                     width: 52,
                     height: 52,
                     decoration: BoxDecoration(
-                      color: c.surfaceContainer,
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                      border: Border.all(color: c.border),
+                      color: c.primaryDim,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: c.primary.withAlpha(50), width: 1.5),
                     ),
-                    child: Icon(IconService.profile, size: 26, color: c.primary),
+                    clipBehavior: Clip.antiAlias,
+                    child: photoUrl != null
+                        ? Image.network(
+                            photoUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => _InitialsAvatar(
+                              initials: initials,
+                              color: c.primary,
+                            ),
+                          )
+                        : _InitialsAvatar(initials: initials, color: c.primary),
                   ),
                   const SizedBox(width: 14),
+                  // Name + email + badge
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Financial Architect',
-                          style: AppTextStyles.titleSm.copyWith(color: c.textPrimary),
+                          displayName,
+                          style: AppTextStyles.titleSm.copyWith(
+                            color: c.textPrimary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: c.primaryDim,
-                            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                            border: Border.all(color: c.primary.withAlpha(40)),
-                          ),
-                          child: Text(
-                            'PREMIUM TIER',
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w700,
-                              color: c.primary,
-                              letterSpacing: 0.6,
+                        if (email.isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            email,
+                            style: AppTextStyles.caption.copyWith(
+                              color: c.textMuted,
+                              fontSize: 11,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Verified Account',
-                          style: AppTextStyles.caption.copyWith(color: c.textMuted),
+                        ],
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            _Badge(label: 'PRO', color: c.primary),
+                            const SizedBox(width: 6),
+                            _Badge(label: 'VERIFIED', color: c.priceUp),
+                          ],
                         ),
                       ],
                     ),
@@ -242,7 +266,7 @@ class _AppDrawer extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             Divider(color: c.border, height: 1),
             const SizedBox(height: 8),
 
@@ -273,12 +297,21 @@ class _AppDrawer extends StatelessWidget {
                     onTap: () => Navigator.of(context).pop(),
                   ),
                   _DrawerItem(
-                    icon: IconService.settings,
-                    label: 'Settings',
-                    isActive: location == AppRoutes.profile,
+                    icon: IconService.profile,
+                    label: 'Profile',
+                    isActive: false,
                     onTap: () {
                       Navigator.of(context).pop();
-                      context.go(AppRoutes.profile);
+                      context.push(AppRoutes.profile);
+                    },
+                  ),
+                  _DrawerItem(
+                    icon: IconService.settings,
+                    label: 'Settings',
+                    isActive: false,
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      context.push(AppRoutes.settings);
                     },
                   ),
                   _DrawerItem(
@@ -293,61 +326,83 @@ class _AppDrawer extends StatelessWidget {
 
             // ── Footer ───────────────────────────────────────────────────────
             Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+              child: Row(
                 children: [
-                  // Platform strength bar
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: c.surfaceContainerLow,
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                      border: Border.all(color: c.border),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'PLATFORM STRENGTH',
-                          style: AppTextStyles.sectionLabel.copyWith(
-                            color: c.textMuted,
-                            fontSize: 9,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: LinearProgressIndicator(
-                            value: 0.85,
-                            backgroundColor: c.border,
-                            color: c.primary,
-                            minHeight: 4,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
+                  Icon(IconService.funds, size: 16, color: c.primary),
+                  const SizedBox(width: 8),
                   Text(
                     'MarketLens360',
-                    style: AppTextStyles.titleSm.copyWith(color: c.primary),
-                  ),
-                  Text(
-                    'Precision Financial Observation',
-                    style: AppTextStyles.caption.copyWith(color: c.textMuted),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'v2.4.0 • Enterprise Edition',
-                    style: AppTextStyles.caption.copyWith(
-                      color: c.textDisabled, fontSize: 9,
+                    style: AppTextStyles.titleSm.copyWith(
+                      color: c.primary,
+                      fontSize: 13,
                     ),
                   ),
                 ],
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  static String _initials(String name) {
+    final parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return name.isNotEmpty ? name[0].toUpperCase() : '?';
+  }
+}
+
+// ── Initials avatar ───────────────────────────────────────────────────────────
+class _InitialsAvatar extends StatelessWidget {
+  const _InitialsAvatar({required this.initials, required this.color});
+
+  final String initials;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        initials,
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          color: color,
+          height: 1,
+        ),
+      ),
+    );
+  }
+}
+
+// ── Small badge ───────────────────────────────────────────────────────────────
+class _Badge extends StatelessWidget {
+  const _Badge({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withAlpha(20),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        border: Border.all(color: color.withAlpha(60)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 9,
+          fontWeight: FontWeight.w700,
+          color: color,
+          letterSpacing: 0.5,
         ),
       ),
     );

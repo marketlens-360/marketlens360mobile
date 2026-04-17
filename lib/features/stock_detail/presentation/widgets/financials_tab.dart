@@ -46,6 +46,7 @@ class FinancialsTab extends ConsumerWidget {
                       Expanded(child: Text(Fmt.kesCompact(e.netIncome), style: AppTextStyles.priceSmall, textAlign: TextAlign.right)),
                       Expanded(child: Text(Fmt.price(e.eps), style: AppTextStyles.priceSmall, textAlign: TextAlign.right)),
                     ],
+
                   ),
                 );
               }).toList(),

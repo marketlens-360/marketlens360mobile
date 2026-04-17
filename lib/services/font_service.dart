@@ -1,14 +1,14 @@
 import 'dart:ui';
 
 abstract final class FontService {
-  // TODO: Update primary to 'Manrope' and numeric to 'Inter' once Google Fonts package is added
-  /// Headline font — used for large titles and display text.
+  /// Headline font — large titles, display text, section labels.
   static const String headline = 'PlusJakartaSans';
 
-  /// UI text font — labels, body copy.
+  /// UI text font — labels, body copy, row titles/subtitles.
   static const String primary = 'PlusJakartaSans';
 
   /// Financial/numeric display font — prices, returns, table figures.
+  /// IBM Plex Sans has first-class tabular figure support.
   static const String numeric = 'IBMPlexSans';
 
   /// Font features applied to all numeric/financial displays.

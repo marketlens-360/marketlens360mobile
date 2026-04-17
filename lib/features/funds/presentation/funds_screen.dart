@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marketlens360mobile/core/theme/app_colors.dart';
 import 'package:marketlens360mobile/core/theme/app_spacing.dart';
 import 'package:marketlens360mobile/core/theme/app_text_styles.dart';
+import 'package:marketlens360mobile/core/widgets/app_bars.dart';
 import 'package:marketlens360mobile/core/widgets/app_card.dart';
 import 'package:marketlens360mobile/core/widgets/app_error_view.dart';
 import 'package:marketlens360mobile/core/widgets/shimmer_list.dart';
@@ -21,65 +22,69 @@ class FundsScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: c.background,
-      appBar: AppBar(
-        backgroundColor: c.background,
-        elevation: 0,
-        leading: Builder(
-          builder: (ctx) => IconButton(
-            icon: Icon(IconService.menu, size: 22, color: c.primary),
-            onPressed: () => Scaffold.of(ctx).openDrawer(),
-          ),
-        ),
-        title: Text(
-          'MarketLens360',
-          style: AppTextStyles.titleSm.copyWith(color: c.primary),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: CircleAvatar(
-              radius: 16,
-              backgroundColor: c.surfaceContainer,
-              child: Icon(IconService.profile, size: 16, color: c.primary),
-            ),
-          ),
-        ],
-      ),
+      appBar: const AppShellBar(),
       body: CustomScrollView(
         slivers: [
+          // ── Page title + description (scrolls away) ──────────────────
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.screenH,
               AppSpacing.lg,
               AppSpacing.screenH,
-              AppSpacing.xxl * 2,
+              AppSpacing.md,
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                // ── Page title ────────────────────────────────────────────────
                 Text(
                   'Discover Unit Trusts',
-                  style: AppTextStyles.displayMd.copyWith(color: c.textPrimary),
+                  style:
+                      AppTextStyles.displayMd.copyWith(color: c.textPrimary),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Maximize your wealth with curated Kenyan investment funds selected for performance.',
-                  style: AppTextStyles.body.copyWith(color: c.textSecondary),
+                  style:
+                      AppTextStyles.body.copyWith(color: c.textSecondary),
                 ),
-                const SizedBox(height: 20),
+              ]),
+            ),
+          ),
 
-                // ── Category chips ────────────────────────────────────────────
-                _CategoryChips(
-                  selectedCategory: funds.selectedCategory,
-                  onSelected: (cat) => ref.read(fundsProvider).setCategory(cat),
+          // ── Category chips (pinned) ──────────────────────────────────
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: _PinnedDelegate(
+              minH: 52,
+              maxH: 52,
+              builder: (ctx) => ColoredBox(
+                color: c.background,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: AppSpacing.sm,
+                  ),
+                  child: _CategoryChips(
+                    selectedCategory: funds.selectedCategory,
+                    onSelected: (cat) =>
+                        ref.read(fundsProvider).setCategory(cat),
+                  ),
                 ),
-                const SizedBox(height: 20),
+              ),
+            ),
+          ),
 
-                // ── Comparison CTA ────────────────────────────────────────────
+          // ── Comparison CTA + fund list + market sentiment ────────────
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screenH,
+              AppSpacing.xl,
+              AppSpacing.screenH,
+              AppSpacing.xxl * 2,
+            ),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
                 const _ComparisonCta(),
                 const SizedBox(height: 24),
 
-                // ── Fund list ─────────────────────────────────────────────────
                 if (funds.isLoading && funds.funds.isEmpty)
                   const ShimmerList(itemCount: 5)
                 else if (funds.error != null && funds.funds.isEmpty)
@@ -94,8 +99,6 @@ class FundsScreen extends ConsumerWidget {
                       )),
 
                 const SizedBox(height: 16),
-
-                // ── Market Sentiment ──────────────────────────────────────────
                 const _MarketSentimentModule(),
               ]),
             ),
@@ -104,6 +107,33 @@ class FundsScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+// ── Pinned sliver header delegate ──────────────────────────────────────────────
+class _PinnedDelegate extends SliverPersistentHeaderDelegate {
+  const _PinnedDelegate({
+    required this.minH,
+    required this.maxH,
+    required this.builder,
+  });
+
+  final double minH;
+  final double maxH;
+  final Widget Function(BuildContext context) builder;
+
+  @override
+  double get minExtent => minH;
+
+  @override
+  double get maxExtent => maxH;
+
+  @override
+  Widget build(
+          BuildContext context, double shrinkOffset, bool overlapsContent) =>
+      builder(context);
+
+  @override
+  bool shouldRebuild(_PinnedDelegate old) => true;
 }
 
 // ── Category chips ─────────────────────────────────────────────────────────────
@@ -126,37 +156,52 @@ class _CategoryChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    return SizedBox(
-      height: 40,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: _items.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (_, i) {
-          final (label, cat) = _items[i];
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      clipBehavior: Clip.none,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenH),
+      child: Row(
+        children: _items.map((item) {
+          final (label, cat) = item;
           final isSelected = selectedCategory == cat;
-          return GestureDetector(
-            onTap: () => onSelected(cat),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: isSelected ? c.primary : c.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                border: Border.all(
-                  color: isSelected ? c.primary : c.border,
+          return Padding(
+            padding: const EdgeInsets.only(right: AppSpacing.sm),
+            child: GestureDetector(
+              onTap: () => onSelected(cat),
+              behavior: HitTestBehavior.opaque,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
+                decoration: BoxDecoration(
+                  color:
+                      isSelected ? c.primary : c.surfaceContainerHigh,
+                  borderRadius:
+                      BorderRadius.circular(AppSpacing.radiusLg),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: c.primary.withAlpha(55),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ]
+                      : null,
                 ),
-              ),
-              child: Text(
-                label.toUpperCase(),
-                style: AppTextStyles.sectionLabel.copyWith(
-                  color: isSelected ? Colors.white : c.textMuted,
-                  fontSize: 10,
+                child: Text(
+                  label.toUpperCase(),
+                  style: TextStyle(
+                    fontFamily: AppTextStyles.sectionLabel.fontFamily,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: isSelected ? Colors.white : c.textSecondary,
+                    letterSpacing: 0.6,
+                  ),
                 ),
               ),
             ),
           );
-        },
+        }).toList(),
       ),
     );
   }
@@ -202,7 +247,8 @@ class _ComparisonCta extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
               ),
               minimumSize: const Size(0, 40),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
               textStyle: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,

@@ -26,29 +26,19 @@ class FundsNotifier extends ChangeNotifier {
   List<Fund> _funds = [];
   FundMarketStats? _marketStats;
   FundCategory? _selectedCategory;
-  String _sort = 'return_1y';
 
   bool get isLoading => _isLoading;
   String? get error => _error;
   List<Fund> get funds => _funds;
   FundMarketStats? get marketStats => _marketStats;
   FundCategory? get selectedCategory => _selectedCategory;
-  String get sort => _sort;
 
   void setCategory(FundCategory? category) {
     if (_disposed) return;
     _selectedCategory = category;
-    _isLoading = false;
-    _notifyListeners();
-    load();
-  }
-
-  void setSort(String sort) {
-    if (_disposed) return;
-    _sort = sort;
-    _isLoading = false;
-    _notifyListeners();
-    load();
+    _funds = [];        // clear stale list so shimmer shows
+    _isLoading = false; // reset guard so load() proceeds
+    load();             // sets _isLoading=true + notifies → shimmer
   }
 
   Future<void> load() async {
@@ -57,14 +47,15 @@ class FundsNotifier extends ChangeNotifier {
     _error = null;
     _notifyListeners();
     try {
-      final results = await Future.wait([
-        _repo.getFunds(category: _selectedCategory, sort: _sort),
-        _repo.getFundMarketStats(),
-      ]);
+      _funds = await _repo.getFunds(category: _selectedCategory);
       if (_disposed) return;
-      _funds       = results[0] as List<Fund>;
-      _marketStats = results[1] as FundMarketStats;
       _error = null;
+      // Market stats are supplementary — a failure should not block the list.
+      try {
+        _marketStats = await _repo.getFundMarketStats();
+      } catch (_) {
+        // Non-critical; UI degrades gracefully without it.
+      }
     } catch (e) {
       if (_disposed) return;
       _error = e.toString();
@@ -108,7 +99,10 @@ class FundDetailNotifier extends ChangeNotifier {
   final FundRepository _repo;
   final int _fundId;
 
-  bool _isLoading = false;
+  // Start as true so the first render immediately shows the shimmer.
+  // _firstLoad lets the scheduled microtask bypass the concurrent-load guard.
+  bool _isLoading = true;
+  bool _firstLoad = true;
   String? _error;
   bool _disposed = false;
 
@@ -127,25 +121,33 @@ class FundDetailNotifier extends ChangeNotifier {
   FundRankingDetail? get rank => _rank;
 
   Future<void> load() async {
-    if (_isLoading) return;
+    // Allow the initial microtask call through (_firstLoad=true), but block
+    // any concurrent duplicate call that arrives while already loading.
+    if (_isLoading && !_firstLoad) return;
+    _firstLoad = false;
     _isLoading = true;
     _error = null;
     _notifyListeners();
     try {
-      final results = await Future.wait([
-        _repo.getFundById(_fundId),
-        _repo.getMonthlyPerformance(_fundId, months: 12),
-        _repo.getYearlyPerformance(_fundId),
-        _repo.getPortfolioHoldings(_fundId),
-        _repo.getFundRank(_fundId),
-      ]);
+      // Only the fund itself is required — everything else is supplementary.
+      _fund = await _repo.getFundById(_fundId);
       if (_disposed) return;
-      _fund        = results[0] as Fund;
-      _monthlyPerf = results[1] as List<MonthlyPerformance>;
-      _yearlyPerf  = results[2] as List<YearlyPerformance>;
-      _holdings    = results[3] as List<PortfolioHolding>;
-      _rank        = results[4] as FundRankingDetail;
       _error = null;
+      // Fire supplementary calls in parallel; individual failures are swallowed.
+      await Future.wait([
+        _repo.getMonthlyPerformance(_fundId, months: 12)
+            .then((v) { if (!_disposed) _monthlyPerf = v; })
+            .catchError((_) {}),
+        _repo.getYearlyPerformance(_fundId)
+            .then((v) { if (!_disposed) _yearlyPerf = v; })
+            .catchError((_) {}),
+        _repo.getPortfolioHoldings(_fundId)
+            .then((v) { if (!_disposed) _holdings = v; })
+            .catchError((_) {}),
+        _repo.getFundRank(_fundId)
+            .then((v) { if (!_disposed) _rank = v; })
+            .catchError((_) {}),
+      ]);
     } catch (e) {
       if (_disposed) return;
       _error = e.toString();

@@ -150,13 +150,25 @@ class _FundListTileState extends State<FundListTile> {
                         fontSize: 9,
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${Fmt.pct(fund.return1y)} (2024)',
-                      style: AppTextStyles.displayMd.copyWith(
-                        color: returnColor,
-                        fontSize: 28,
-                      ),
+                    const SizedBox(height: 4),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          Fmt.pct(fund.return1y),
+                          style: AppTextStyles.titleLg.copyWith(
+                            color: returnColor,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '(2024)',
+                          style: AppTextStyles.labelMd.copyWith(
+                            color: c.textMuted,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -176,10 +188,13 @@ class _FundListTileState extends State<FundListTile> {
                     ),
                     const SizedBox(width: 8),
                     _MetricCell(
-                      label: '6M RETURNS',
-                      value: Fmt.pct(fund.return6m),
-                      valueColor:
-                          (fund.return6m ?? 0) >= 0 ? c.priceUp : c.priceDown,
+                      label: '3Y RETURNS',
+                      value: fund.return3y != null
+                          ? '${Fmt.pct(fund.return3y)} (2024)'
+                          : '—',
+                      valueColor: (fund.return3y ?? 0) >= 0
+                          ? c.priceUp
+                          : c.priceDown,
                     ),
                   ],
                 ),

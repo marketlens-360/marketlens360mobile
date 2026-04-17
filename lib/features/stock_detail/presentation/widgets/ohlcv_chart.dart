@@ -12,13 +12,15 @@ class OhlcvChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+
     if (data.isEmpty) {
-      return const SizedBox(
-        height: 200,
+      return SizedBox(
+        height: 280,
         child: Center(
           child: Text(
             'No chart data available',
-            style: TextStyle(color: AppColors.textMuted),
+            style: AppTextStyles.body.copyWith(color: c.textMuted),
           ),
         ),
       );
@@ -30,35 +32,38 @@ class OhlcvChart extends StatelessWidget {
 
     final minY = data.map((d) => d.low ?? d.close ?? 0).reduce((a, b) => a < b ? a : b);
     final maxY = data.map((d) => d.high ?? d.close ?? 0).reduce((a, b) => a > b ? a : b);
-    final padding = (maxY - minY) * 0.05;
+    final padding = (maxY - minY) * 0.08;
 
     return SizedBox(
-      height: 200,
+      height: 280,
       child: LineChart(
         LineChartData(
           minY: minY - padding,
           maxY: maxY + padding,
           gridData: FlGridData(
             drawVerticalLine: false,
-            getDrawingHorizontalLine: (_) => const FlLine(
-              color: AppColors.border,
+            getDrawingHorizontalLine: (_) => FlLine(
+              color: c.border,
               strokeWidth: 0.5,
             ),
           ),
           borderData: FlBorderData(show: false),
           titlesData: FlTitlesData(
-            leftTitles: AxisTitles(
+            leftTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            rightTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
                 reservedSize: 48,
-                getTitlesWidget: (v, _) => Text(
-                  Fmt.price(v),
-                  style: AppTextStyles.columnHeader,
+                getTitlesWidget: (v, _) => Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: Text(
+                    Fmt.price(v),
+                    style: AppTextStyles.columnHeader.copyWith(color: c.textMuted),
+                  ),
                 ),
               ),
-            ),
-            rightTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
             ),
             topTitles: const AxisTitles(
               sideTitles: SideTitles(showTitles: false),
@@ -66,12 +71,17 @@ class OhlcvChart extends StatelessWidget {
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
+                reservedSize: 24,
                 getTitlesWidget: (v, _) {
                   final i = v.toInt();
-                  if (i >= 0 && i < data.length && i % (data.length ~/ 4).clamp(1, data.length) == 0) {
-                    return Text(
-                      Fmt.dateShort(data[i].date),
-                      style: AppTextStyles.columnHeader,
+                  final step = (data.length ~/ 4).clamp(1, data.length);
+                  if (i >= 0 && i < data.length && i % step == 0) {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text(
+                        Fmt.dateShort(data[i].date),
+                        style: AppTextStyles.columnHeader.copyWith(color: c.textMuted),
+                      ),
                     );
                   }
                   return const SizedBox.shrink();
@@ -82,18 +92,27 @@ class OhlcvChart extends StatelessWidget {
           lineBarsData: [
             LineChartBarData(
               spots: spots,
-              isCurved: false,
-              color: AppColors.accent,
-              barWidth: 1.5,
+              isCurved: true,
+              curveSmoothness: 0.3,
+              color: c.primary,
+              barWidth: 2.5,
               dotData: const FlDotData(show: false),
               belowBarData: BarAreaData(
                 show: true,
-                color: AppColors.accent.withAlpha(20),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    c.primary.withAlpha(80),
+                    c.primary.withAlpha(5),
+                  ],
+                ),
               ),
             ),
           ],
           lineTouchData: LineTouchData(
             touchTooltipData: LineTouchTooltipData(
+              getTooltipColor: (_) => c.surfaceContainer,
               getTooltipItems: (spots) => spots.map((s) {
                 final i = s.x.toInt();
                 final label = i >= 0 && i < data.length
@@ -101,7 +120,7 @@ class OhlcvChart extends StatelessWidget {
                     : '';
                 return LineTooltipItem(
                   '${Fmt.price(s.y)}\n$label',
-                  AppTextStyles.priceSmall,
+                  AppTextStyles.priceSmall.copyWith(color: c.textPrimary),
                 );
               }).toList(),
             ),

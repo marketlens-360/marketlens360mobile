@@ -14,46 +14,50 @@ class ShimmerList extends StatelessWidget {
     final base      = isDark ? const Color(0xFF1F2937) : const Color(0xFFE5E7EB);
     final highlight = isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6);
 
-    return Shimmer.fromColors(
-      baseColor: base,
-      highlightColor: highlight,
-      child: ListView.separated(
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: itemCount,
-        separatorBuilder: (_, __) => Divider(color: AppColors.of(context).border, height: 1),
-        itemBuilder: (_, __) => Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.screenH,
-            vertical: AppSpacing.listItemV + 2,
+    Widget buildItem() => Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.screenH,
+        vertical: AppSpacing.listItemV + 2,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(height: 13, width: 52, decoration: BoxDecoration(color: base, borderRadius: BorderRadius.circular(4))),
+                const SizedBox(height: 6),
+                Container(height: 11, width: 120, decoration: BoxDecoration(color: base, borderRadius: BorderRadius.circular(4))),
+              ],
+            ),
           ),
-          child: Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(height: 13, width: 52, decoration: BoxDecoration(color: base, borderRadius: BorderRadius.circular(4))),
-                    const SizedBox(height: 6),
-                    Container(height: 11, width: 120, decoration: BoxDecoration(color: base, borderRadius: BorderRadius.circular(4))),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Container(height: 13, width: 56, decoration: BoxDecoration(color: base, borderRadius: BorderRadius.circular(4))),
-                  const SizedBox(height: 6),
-                  Container(
-                    height: 22,
-                    width: 52,
-                    decoration: BoxDecoration(color: base, borderRadius: BorderRadius.circular(AppSpacing.radiusPill)),
-                  ),
-                ],
+              Container(height: 13, width: 56, decoration: BoxDecoration(color: base, borderRadius: BorderRadius.circular(4))),
+              const SizedBox(height: 6),
+              Container(
+                height: 22,
+                width: 52,
+                decoration: BoxDecoration(color: base, borderRadius: BorderRadius.circular(AppSpacing.radiusPill)),
               ),
             ],
           ),
-        ),
+        ],
       ),
+    );
+
+    final divider = Divider(color: AppColors.of(context).border, height: 1);
+    final children = <Widget>[];
+    for (var i = 0; i < itemCount; i++) {
+      if (i > 0) children.add(divider);
+      children.add(buildItem());
+    }
+
+    return Shimmer.fromColors(
+      baseColor: base,
+      highlightColor: highlight,
+      child: Column(children: children),
     );
   }
 }

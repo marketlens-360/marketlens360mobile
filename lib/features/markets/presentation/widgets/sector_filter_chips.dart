@@ -62,7 +62,7 @@ class _Chip extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             color: isSelected ? AppColors.accentDim : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
             border: Border.all(
               color: isSelected ? AppColors.accent : AppColors.borderMedium,
               width: 0.5,

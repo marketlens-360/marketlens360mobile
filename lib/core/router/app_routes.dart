@@ -3,7 +3,8 @@ abstract final class AppRoutes {
   static const stocks  = '/stocks';
   static const funds   = '/funds';
   static const aiChat  = '/ai-chat';
-  static const profile = '/profile';
+  static const profile  = '/profile';
+  static const settings = '/settings';
 
   // Auth
   static const login          = '/auth/login';

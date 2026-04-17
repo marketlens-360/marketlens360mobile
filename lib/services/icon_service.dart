@@ -42,6 +42,7 @@ abstract final class IconService {
   static const delete    = LucideIcons.trash_2;
   static const arrowUp   = LucideIcons.arrow_up;
   static const arrowDown = LucideIcons.arrow_down;
+  static const back      = LucideIcons.arrow_left;
 
   // ── Legacy aliases (kept for backwards compat with existing widgets) ──────────
   static const markets = LucideIcons.trending_up;

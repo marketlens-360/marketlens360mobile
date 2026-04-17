@@ -1,16 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:marketlens360mobile/core/router/app_routes.dart';
 import 'package:marketlens360mobile/core/theme/app_colors.dart';
 import 'package:marketlens360mobile/core/theme/app_spacing.dart';
 import 'package:marketlens360mobile/core/theme/app_text_styles.dart';
+import 'package:marketlens360mobile/core/widgets/app_bars.dart';
 import 'package:marketlens360mobile/features/auth/providers/auth_providers.dart';
 import 'package:marketlens360mobile/features/profile/providers/profile_providers.dart';
-import 'package:marketlens360mobile/services/icon_service.dart';
-
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
@@ -31,204 +30,101 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final isEmailProvider = authUser.providerData
-        .any((p) => p.providerId == 'password');
-    final isGoogleProvider = authUser.providerData
-        .any((p) => p.providerId == 'google.com');
+    final isEmailProvider = authUser.providerData.any((p) => p.providerId == 'password');
+    final initials        = _initials(authUser);
+    final version          = profile.packageInfo?.version;
+    final build            = profile.packageInfo?.buildNumber;
 
     return Scaffold(
-      backgroundColor: c.background,
-      appBar: AppBar(
-        backgroundColor: c.background,
-        title: Text('Profile', style: AppTextStyles.screenTitle.copyWith(color: c.textPrimary)),
-        elevation: 0,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Divider(color: c.border, height: 1),
-        ),
+      backgroundColor: c.surfaceContainerLowest,
+      appBar: AppDetailBar(
+        title: 'Profile',
+        actions: [
+          IconButton(
+            icon: Icon(Icons.more_vert, size: 20, color: c.textSecondary),
+            onPressed: () => _showEditNameSheet(context, authUser, c),
+          ),
+        ],
       ),
       body: ListView(
-        padding: EdgeInsets.zero,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenH),
         children: [
-          // ── User header ─────────────────────────────────────────────────────
-          _ProfileHeader(user: authUser),
+          const SizedBox(height: AppSpacing.lg),
 
-          const SizedBox(height: AppSpacing.xl),
-
-          // ── Account info ────────────────────────────────────────────────────
-          _SectionLabel('ACCOUNT'),
-          _InfoCard(
-            children: [
-              _InfoRow(
-                icon: IconService.profile,
-                label: 'Display Name',
-                value: authUser.displayName?.isNotEmpty == true
-                    ? authUser.displayName!
-                    : '—',
-                trailing: IconButton(
-                  icon: Icon(_kEditIcon, size: 16, color: c.primary),
-                  onPressed: () => _showEditNameSheet(context, authUser, c),
-                ),
-              ),
-              _Divider(),
-              _InfoRow(
-                icon: IconService.bell,
-                label: 'Email',
-                value: authUser.email ?? '—',
-                valueColor: c.textPrimary,
-                trailing: authUser.emailVerified
-                    ? _VerifiedBadge()
-                    : _UnverifiedBadge(
-                        onTap: () => _sendVerification(authUser),
-                      ),
-              ),
-              if (authUser.metadata.creationTime != null) ...[
-                _Divider(),
-                _InfoRow(
-                  icon: IconService.inbox,
-                  label: 'Member Since',
-                  value: _formatDate(authUser.metadata.creationTime!),
-                ),
-              ],
-              _Divider(),
-              _InfoRow(
-                icon: isGoogleProvider
-                    ? IconService.search  // placeholder; Google icon not in lucide
-                    : IconService.bell,
-                label: 'Sign-in Method',
-                value: isGoogleProvider ? 'Google' : 'Email & Password',
-              ),
-            ],
+          // ── Hero card ─────────────────────────────────────────────────────
+          _HeroCard(
+            user: authUser,
+            initials: initials,
+            onEditTap: () => _showEditNameSheet(context, authUser, c),
           ),
 
+
           const SizedBox(height: AppSpacing.xl),
 
-          // ── Security (email users only) ─────────────────────────────────────
-          if (isEmailProvider) ...[
-            _SectionLabel('SECURITY'),
-            _InfoCard(
-              children: [
-                _ActionRow(
-                  icon: IconService.eyeOff,
+          // ── Security ──────────────────────────────────────────────────────
+          const _SectionLabel('SECURITY'),
+          const SizedBox(height: AppSpacing.sm),
+          _SectionCard(
+            children: [
+              if (isEmailProvider) ...[
+                _NavRow(
+                  icon: LucideIcons.lock,
+                  iconBgColor: c.tertiary,
                   label: 'Change Password',
+                  subtitle: 'Update your account password',
                   onTap: () => _showChangePasswordSheet(context, authUser, c),
                 ),
+                const _RowDivider(),
                 if (!authUser.emailVerified) ...[
-                  _Divider(),
-                  _ActionRow(
-                    icon: IconService.bell,
+                  _NavRow(
+                    icon: LucideIcons.mail,
+                    iconBgColor: c.tertiary,
                     label: 'Resend Verification Email',
+                    subtitle: 'Check your inbox for the link',
                     onTap: () => _sendVerification(authUser),
                   ),
+                  const _RowDivider(),
                 ],
               ],
-            ),
-            const SizedBox(height: AppSpacing.xl),
-          ],
-
-          // ── Preferences ─────────────────────────────────────────────────────
-          _SectionLabel('PREFERENCES'),
-          _InfoCard(
-            children: [
-              _PreferenceTile(
-                icon: IconService.bell,
-                label: 'Push Notifications',
-                value: profile.pushNotificationsEnabled,
-                onChanged: (v) =>
-                    ref.read(profileProvider).setPushNotifications(v),
-              ),
-              _Divider(),
-              _PreferenceTile(
-                icon: IconService.eyeOff,
+              _ToggleRow(
+                icon: Icons.fingerprint,
                 label: 'Biometric Login',
-                subtitle: 'Face ID or fingerprint',
+                subtitle: 'Face ID & Touch ID',
                 value: profile.biometricLoginEnabled,
                 onChanged: (v) =>
                     ref.read(profileProvider).setBiometricLogin(v),
               ),
-              _Divider(),
-              _PreferenceTile(
-                icon: IconService.error,
-                label: 'Data Delay Disclaimer',
-                subtitle: 'Show "Delayed 15 min" on prices',
-                value: profile.delayedDataDisclaimer,
-                onChanged: (v) =>
-                    ref.read(profileProvider).setDelayedDataDisclaimer(v),
-              ),
             ],
           ),
 
           const SizedBox(height: AppSpacing.xl),
 
-          // ── App ─────────────────────────────────────────────────────────────
-          _SectionLabel('APP'),
-          _InfoCard(
+          // ── Settings nav ──────────────────────────────────────────────────
+          const _SectionLabel('PREFERENCES'),
+          const SizedBox(height: AppSpacing.sm),
+          _SectionCard(
             children: [
-              profile.packageInfo != null
-                  ? _InfoRow(
-                      icon: IconService.inbox,
-                      label: 'Version',
-                      value: '${profile.packageInfo!.version} (${profile.packageInfo!.buildNumber})',
-                    )
-                  : const SizedBox(height: 48),
-              _Divider(),
-              _ActionRow(
-                icon: IconService.inbox,
-                label: 'Account ID',
-                trailing: GestureDetector(
-                  onTap: () {
-                    Clipboard.setData(ClipboardData(text: authUser.uid));
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('UID copied', style: TextStyle(color: c.textPrimary)),
-                        backgroundColor: c.surface,
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
-                  },
-                  child: Text(
-                    '${authUser.uid.substring(0, 8)}…',
-                    style: AppTextStyles.labelSm.copyWith(
-                      color: c.primary,
-                      fontFamily: 'monospace',
-                    ),
-                  ),
-                ),
+              _NavRow(
+                icon: LucideIcons.settings,
+                label: 'App Settings',
+                subtitle: 'Theme, notifications, data',
+                onTap: () => context.push(AppRoutes.settings),
               ),
             ],
           ),
 
+          const SizedBox(height: AppSpacing.xxl),
+
+          // ── Sign out ──────────────────────────────────────────────────────
+          _SignOutCard(
+            isLoading: _isSigningOut,
+            onTap: () => _signOut(context),
+          ),
+
           const SizedBox(height: AppSpacing.xl),
 
-          // ── Sign out ────────────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenH),
-            child: SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: c.priceDown.withAlpha(80)),
-                  foregroundColor: c.priceDown,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                  ),
-                  textStyle: AppTextStyles.labelLg,
-                ),
-                onPressed: _isSigningOut ? null : () => _signOut(context),
-                child: _isSigningOut
-                    ? SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: c.priceDown,
-                        ),
-                      )
-                    : const Text('Sign Out'),
-              ),
-            ),
-          ),
+          // ── Footer ────────────────────────────────────────────────────────
+          _ProfileFooter(version: version, buildNumber: build),
 
           const SizedBox(height: AppSpacing.xxl * 2),
         ],
@@ -237,6 +133,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   // ── Actions ────────────────────────────────────────────────────────────────
+
   Future<void> _signOut(BuildContext context) async {
     setState(() => _isSigningOut = true);
     try {
@@ -258,9 +155,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
       }
     }
   }
@@ -272,7 +168,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       backgroundColor: c.surface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusXl)),
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppSpacing.radiusXl)),
       ),
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(
@@ -285,7 +182,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Edit Display Name', style: AppTextStyles.labelLg.copyWith(color: c.textPrimary)),
+            Text('Edit Display Name',
+                style: AppTextStyles.labelLg.copyWith(color: c.textPrimary)),
             const SizedBox(height: AppSpacing.md),
             TextField(
               controller: ctrl,
@@ -315,7 +213,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  void _showChangePasswordSheet(BuildContext context, User user, AppColorsData c) {
+  void _showChangePasswordSheet(
+      BuildContext context, User user, AppColorsData c) {
     final currentCtrl = TextEditingController();
     final newCtrl     = TextEditingController();
     String? error;
@@ -325,10 +224,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       backgroundColor: c.surface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusXl)),
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppSpacing.radiusXl)),
       ),
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setState) => Padding(
+        builder: (ctx, setSheetState) => Padding(
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(ctx).viewInsets.bottom + AppSpacing.lg,
             top: AppSpacing.lg,
@@ -339,32 +239,40 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Change Password', style: AppTextStyles.labelLg.copyWith(color: c.textPrimary)),
+              Text('Change Password',
+                  style: AppTextStyles.labelLg
+                      .copyWith(color: c.textPrimary)),
               const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: currentCtrl,
                 obscureText: true,
-                decoration: const InputDecoration(hintText: 'Current password'),
+                decoration:
+                    const InputDecoration(hintText: 'Current password'),
               ),
               const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: newCtrl,
                 obscureText: true,
-                decoration: const InputDecoration(hintText: 'New password (min 6 chars)'),
+                decoration: const InputDecoration(
+                    hintText: 'New password (min 6 chars)'),
               ),
               if (error != null) ...[
                 const SizedBox(height: AppSpacing.sm),
-                Text(error!, style: AppTextStyles.labelSm.copyWith(color: c.priceDown)),
+                Text(error!,
+                    style: AppTextStyles.labelSm
+                        .copyWith(color: c.priceDown)),
               ],
               const SizedBox(height: AppSpacing.lg),
               SizedBox(
                 width: double.infinity,
                 height: 48,
                 child: FilledButton(
-                  style: FilledButton.styleFrom(backgroundColor: c.primary),
+                  style:
+                      FilledButton.styleFrom(backgroundColor: c.primary),
                   onPressed: () async {
                     if (newCtrl.text.length < 6) {
-                      setState(() => error = 'Password must be at least 6 characters');
+                      setSheetState(() => error =
+                          'Password must be at least 6 characters');
                       return;
                     }
                     try {
@@ -377,11 +285,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       if (ctx.mounted) {
                         Navigator.pop(ctx);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Password updated')),
+                          const SnackBar(
+                              content: Text('Password updated')),
                         );
                       }
                     } on FirebaseAuthException catch (e) {
-                      setState(() => error = e.message ?? 'Authentication failed');
+                      setSheetState(() =>
+                          error = e.message ?? 'Authentication failed');
                     }
                   },
                   child: const Text('Update Password'),
@@ -390,113 +300,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  String _formatDate(DateTime dt) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return '${months[dt.month - 1]} ${dt.year}';
-  }
-}
-
-// Lucide doesn't have a distinct 'pencil' in 0.0.1 — use profile as edit fallback
-const _kEditIcon = IconService.profile;
-
-// ── Sub-widgets ────────────────────────────────────────────────────────────────
-
-class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader({required this.user});
-
-  final User user;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = AppColors.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final initials = _initials(user);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
-      decoration: BoxDecoration(
-        color: c.background,
-      ),
-      child: Column(
-        children: [
-          // Avatar
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: c.primaryDim,
-              border: Border.all(color: c.primary.withAlpha(60), width: 2),
-              boxShadow: isDark
-                  ? null
-                  : [
-                      BoxShadow(
-                        color: c.primary.withAlpha(40),
-                        blurRadius: 20,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-            ),
-            child: user.photoURL != null
-                ? ClipOval(
-                    child: Image.network(
-                      user.photoURL!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _InitialsText(initials, c),
-                    ),
-                  )
-                : _InitialsText(initials, c),
-          ),
-          const SizedBox(height: AppSpacing.md),
-
-          // Display name
-          Text(
-            user.displayName?.isNotEmpty == true ? user.displayName! : 'Investor',
-            style: AppTextStyles.screenTitle.copyWith(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: c.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 4),
-
-          // Email
-          Text(
-            user.email ?? '',
-            style: AppTextStyles.labelSm.copyWith(color: c.textMuted),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-
-          // PRO + verification row
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _Badge(label: 'PRO', bg: c.primaryDim, border: c.primary.withAlpha(51), fg: c.primary),
-              const SizedBox(width: AppSpacing.sm),
-              if (user.emailVerified)
-                _Badge(
-                  label: 'Verified',
-                  bg: c.priceUpDim,
-                  border: c.priceUp.withAlpha(51),
-                  fg: c.priceUp,
-                )
-              else
-                _Badge(
-                  label: 'Unverified',
-                  bg: c.priceDownDim,
-                  border: c.priceDown.withAlpha(51),
-                  fg: c.priceDown,
-                ),
-            ],
-          ),
-        ],
       ),
     );
   }
@@ -513,176 +316,231 @@ class _ProfileHeader extends StatelessWidget {
   }
 }
 
-class _InitialsText extends StatelessWidget {
-  const _InitialsText(this.text, this.c);
+// ── Hero card ──────────────────────────────────────────────────────────────────
 
-  final String text;
-  final AppColorsData c;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.w700,
-          color: c.primary,
-        ),
-      ),
-    );
-  }
-}
-
-class _Badge extends StatelessWidget {
-  const _Badge({required this.label, required this.bg, required this.border, required this.fg});
-
-  final String label;
-  final Color bg, border, fg;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-        border: Border.all(color: border),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: fg,
-          letterSpacing: 0.3,
-        ),
-      ),
-    );
-  }
-}
-
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel(this.label);
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = AppColors.of(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.screenH, 0, AppSpacing.screenH, AppSpacing.sm),
-      child: Text(
-        label,
-        style: AppTextStyles.sectionLabel.copyWith(
-          color: c.textMuted,
-          letterSpacing: 1.0,
-        ),
-      ),
-    );
-  }
-}
-
-class _InfoCard extends StatelessWidget {
-  const _InfoCard({required this.children});
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = AppColors.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.screenH),
-      decoration: BoxDecoration(
-        color: c.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
-        border: Border.all(color: c.border, width: 1),
-        boxShadow: isDark
-            ? null
-            : [
-                BoxShadow(
-                  color: Colors.black.withAlpha(10),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-      ),
-      child: Column(children: children),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  const _InfoRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-    this.valueColor,
-    this.trailing,
+class _HeroCard extends StatelessWidget {
+  const _HeroCard({
+    required this.user,
+    required this.initials,
+    required this.onEditTap,
   });
 
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color? valueColor;
-  final Widget? trailing;
+  final User user;
+  final String initials;
+  final VoidCallback onEditTap;
 
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 14),
-      child: Row(
+
+    return Container(
+      width: double.infinity,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: c.primary,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+      ),
+      child: Stack(
         children: [
-          Icon(icon, size: 16, color: c.textMuted),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Text(
-              label,
-              style: AppTextStyles.labelMd.copyWith(color: c.textSecondary),
+          // Decorative watermark
+          Positioned(
+            right: -20,
+            top: -20,
+            child: Icon(
+              LucideIcons.circle_user,
+              size: 130,
+              color: Colors.white.withAlpha(15),
             ),
           ),
-          Flexible(
-            child: Text(
-              value,
-              style: AppTextStyles.labelMd.copyWith(color: valueColor ?? c.textPrimary),
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.right,
-            ),
-          ),
-          if (trailing != null) ...[const SizedBox(width: 4), trailing!],
+          Padding(
+            padding: const EdgeInsets.symmetric(
+                vertical: 32, horizontal: AppSpacing.xl),
+            child: Row(
+              children: [
+              Expanded(child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Avatar with edit button
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      width: 90,
+                      height: 90,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withAlpha(30),
+                        border: Border.all(color: Colors.white, width: 3),
+                      ),
+                      child: user.photoURL != null
+                          ? ClipOval(
+                              child: Image.network(
+                                user.photoURL!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) =>
+                                    _HeroInitials(initials),
+                              ),
+                            )
+                          : _HeroInitials(initials),
+                    ),
+                    // Edit button
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: onEditTap,
+                        child: Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withAlpha(30),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Icon(LucideIcons.pencil,
+                              size: 13, color: c.primary),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+
+                // Name
+                Text(
+                  user.displayName?.isNotEmpty == true
+                      ? user.displayName!
+                      : 'Investor',
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                const SizedBox(height: 4),
+
+                // Email
+                Text(
+                  user.email ?? '',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.white.withAlpha(200),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // PREMIUM INVESTOR badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 18, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withAlpha(28),
+                    borderRadius:
+                        BorderRadius.circular(AppSpacing.radiusPill),
+                    border:
+                        Border.all(color: Colors.white.withAlpha(70)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(LucideIcons.check_circle_2,
+                          size: 13, color: Colors.white),
+                      const SizedBox(width: 7),
+                      const Text(
+                        'PREMIUM INVESTOR',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            )),           // Expanded + Column
+            ],            // Row children
+          ),              // Row
+          ),              // Padding
         ],
       ),
     );
   }
 }
 
-class _ActionRow extends StatelessWidget {
-  const _ActionRow({required this.icon, required this.label, this.onTap, this.trailing});
+class _HeroInitials extends StatelessWidget {
+  const _HeroInitials(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 30,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+}
+
+// ── Row types ──────────────────────────────────────────────────────────────────
+
+class _NavRow extends StatelessWidget {
+  const _NavRow({
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+    this.iconBgColor,
+    this.onTap,
+  });
 
   final IconData icon;
   final String label;
+  final String subtitle;
+  final Color? iconBgColor;
   final VoidCallback? onTap;
-  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 14),
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg, vertical: AppSpacing.md),
         child: Row(
           children: [
-            Icon(icon, size: 16, color: c.textMuted),
-            const SizedBox(width: AppSpacing.md),
+            _IconBox(icon: icon, bgColor: iconBgColor),
+            const SizedBox(width: 14),
             Expanded(
-              child: Text(label, style: AppTextStyles.labelMd.copyWith(color: c.textPrimary)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label,
+                      style: AppTextStyles.labelMd.copyWith(
+                          color: c.textPrimary,
+                          fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 2),
+                  Text(subtitle,
+                      style: AppTextStyles.labelSm
+                          .copyWith(color: c.textMuted)),
+                ],
+              ),
             ),
-            trailing ??
-                Icon(IconService.arrowDown, size: 14, color: c.textMuted),
+            Icon(LucideIcons.chevron_right, size: 16, color: c.textMuted),
           ],
         ),
       ),
@@ -690,37 +548,44 @@ class _ActionRow extends StatelessWidget {
   }
 }
 
-class _PreferenceTile extends StatelessWidget {
-  const _PreferenceTile({
+class _ToggleRow extends StatelessWidget {
+  const _ToggleRow({
     required this.icon,
     required this.label,
+    required this.subtitle,
     required this.value,
     required this.onChanged,
-    this.subtitle,
+    this.subtitleColor,
   });
 
   final IconData icon;
   final String label;
+  final String subtitle;
   final bool value;
   final ValueChanged<bool> onChanged;
-  final String? subtitle;
+  final Color? subtitleColor;
 
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 4),
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg, vertical: AppSpacing.md),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: c.textMuted),
-          const SizedBox(width: AppSpacing.md),
+          _IconBox(icon: icon),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: AppTextStyles.labelMd.copyWith(color: c.textPrimary)),
-                if (subtitle != null)
-                  Text(subtitle!, style: AppTextStyles.labelSm.copyWith(color: c.textMuted)),
+                Text(label,
+                    style: AppTextStyles.labelMd.copyWith(
+                        color: c.textPrimary, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 2),
+                Text(subtitle,
+                    style: AppTextStyles.labelSm
+                        .copyWith(color: subtitleColor ?? c.textMuted)),
               ],
             ),
           ),
@@ -736,13 +601,229 @@ class _PreferenceTile extends StatelessWidget {
   }
 }
 
-class _Divider extends StatelessWidget {
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.trailing,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+      child: Row(
+        children: [
+          _IconBox(icon: icon),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label,
+                    style: AppTextStyles.labelMd.copyWith(
+                        color: c.textPrimary, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 2),
+                Text(value,
+                    style: AppTextStyles.labelSm
+                        .copyWith(color: c.textMuted)),
+              ],
+            ),
+          ),
+          if (trailing != null) trailing!,
+        ],
+      ),
+    );
+  }
+}
+
+// ── Sign out card ──────────────────────────────────────────────────────────────
+
+class _SignOutCard extends StatelessWidget {
+  const _SignOutCard({required this.isLoading, required this.onTap});
+
+  final bool isLoading;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c      = AppColors.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return GestureDetector(
+      onTap: isLoading ? null : onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 18),
+        decoration: BoxDecoration(
+          color: isDark ? c.surface : Colors.white,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          boxShadow: isDark
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(10),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+        ),
+        child: isLoading
+            ? const Center(
+                child: SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(LucideIcons.log_out, size: 18, color: c.textPrimary),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Sign Out',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: c.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+}
+
+// ── Footer ─────────────────────────────────────────────────────────────────────
+
+class _ProfileFooter extends StatelessWidget {
+  const _ProfileFooter({this.version, this.buildNumber});
+
+  final String? version;
+  final String? buildNumber;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    if (version == null) return const SizedBox.shrink();
+    return Column(
+      children: [
+        Text(
+          'VERSION $version${buildNumber != null && buildNumber!.isNotEmpty ? ' (BUILD $buildNumber)' : ''}',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 9,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.8,
+            color: c.textDisabled,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'MARKETLENS 360',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.6,
+            color: c.primary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Shared widgets ─────────────────────────────────────────────────────────────
+
+class _IconBox extends StatelessWidget {
+  const _IconBox({required this.icon, this.bgColor, this.iconColor});
+
+  final IconData icon;
+  final Color? bgColor;
+  final Color? iconColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: bgColor ?? c.primary,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      ),
+      child: Icon(icon, size: 20, color: iconColor ?? Colors.white),
+    );
+  }
+}
+
+class _SectionCard extends StatelessWidget {
+  const _SectionCard({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final c      = AppColors.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? c.surface : Colors.white,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: c.border),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withAlpha(10),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
+      child: Column(children: children),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel(this.label);
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return Text(
+      label,
+      style: AppTextStyles.sectionLabel.copyWith(
+        color: c.textMuted,
+        letterSpacing: 1.0,
+        fontSize: 10,
+      ),
+    );
+  }
+}
+
+class _RowDivider extends StatelessWidget {
+  const _RowDivider();
+
   @override
   Widget build(BuildContext context) {
     return Divider(
       color: AppColors.of(context).border,
       height: 1,
-      indent: AppSpacing.screenH + 16 + AppSpacing.md,
+      indent: AppSpacing.lg + 40 + 14,
     );
   }
 }
@@ -760,7 +841,8 @@ class _VerifiedBadge extends StatelessWidget {
       ),
       child: Text(
         '✓ Verified',
-        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: c.priceUp),
+        style: TextStyle(
+            fontSize: 10, fontWeight: FontWeight.w600, color: c.priceUp),
       ),
     );
   }
@@ -785,7 +867,8 @@ class _UnverifiedBadge extends StatelessWidget {
         ),
         child: Text(
           'Verify →',
-          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: c.priceDown),
+          style: TextStyle(
+              fontSize: 10, fontWeight: FontWeight.w600, color: c.priceDown),
         ),
       ),
     );

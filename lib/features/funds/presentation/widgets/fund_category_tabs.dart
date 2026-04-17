@@ -14,24 +14,23 @@ class FundCategoryTabs extends ConsumerWidget {
     final selected = ref.watch(fundsProvider).selectedCategory;
 
     const categories = [
-      (null, 'All'),
-      (FundCategory.mmf, 'MMF'),
-      (FundCategory.equity, 'Equity'),
-      (FundCategory.fif, 'Fixed Income'),
-      (FundCategory.bal, 'Balanced'),
-      (FundCategory.spf, 'Special'),
+      (null, 'ALL FUNDS'),
+      (FundCategory.mmf, 'MONEY MARKET'),
+      (FundCategory.fif, 'FIXED INCOME'),
+      (FundCategory.bal, 'BALANCED'),
+      (FundCategory.equity, 'EQUITY'),
+      (FundCategory.spf, 'SPECIAL'),
     ];
 
-    return SizedBox(
-      height: 36,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenH),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenH),
+      child: Row(
         children: categories
-            .map((c) => _CategoryChip(
-                  label: c.$2,
-                  isSelected: selected == c.$1,
-                  onTap: () => ref.read(fundsProvider).setCategory(c.$1),
+            .map((cat) => _CategoryChip(
+                  label: cat.$2,
+                  isSelected: selected == cat.$1,
+                  onTap: () => ref.read(fundsProvider).setCategory(cat.$1),
                 ))
             .toList(),
       ),
@@ -52,27 +51,37 @@ class _CategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return Padding(
       padding: const EdgeInsets.only(right: AppSpacing.sm),
       child: GestureDetector(
         onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.xs,
-          ),
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.accentDim : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-            border: Border.all(
-              color: isSelected ? AppColors.accent : AppColors.borderMedium,
-              width: 0.5,
-            ),
+            color: isSelected ? c.primary : c.surfaceContainerHigh,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: c.primary.withAlpha(55),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ]
+                : null,
           ),
+          alignment: Alignment.center,
           child: Text(
             label,
-            style: AppTextStyles.labelMd.copyWith(
-              color: isSelected ? AppColors.accent : AppColors.textSecondary,
+            style: TextStyle(
+              fontFamily: AppTextStyles.labelMd.fontFamily,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: isSelected ? Colors.white : c.textSecondary,
+              letterSpacing: 0.6,
             ),
           ),
         ),

@@ -28,7 +28,8 @@ class StockDetailNotifier extends ChangeNotifier {
   final AppDatabase _db;
   final String _symbol;
 
-  bool _isLoading = false;
+  bool _isLoading = true;
+  bool _firstLoad = true;
   bool _isHistoryLoading = false;
   String? _error;
   bool _disposed = false;
@@ -45,7 +46,8 @@ class StockDetailNotifier extends ChangeNotifier {
   String get period => _period;
 
   Future<void> load() async {
-    if (_isLoading) return;
+    if (_isLoading && !_firstLoad) return;
+    _firstLoad = false;
     _isLoading = true;
     _error = null;
     _notifyListeners();

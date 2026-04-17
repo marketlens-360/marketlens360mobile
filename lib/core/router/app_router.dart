@@ -14,6 +14,7 @@ import 'package:marketlens360mobile/features/home/presentation/home_screen.dart'
 import 'package:marketlens360mobile/features/ai_chat/presentation/ai_chat_screen.dart';
 import 'package:marketlens360mobile/features/markets/presentation/markets_screen.dart';
 import 'package:marketlens360mobile/features/profile/presentation/profile_screen.dart';
+import 'package:marketlens360mobile/features/profile/presentation/settings_screen.dart';
 import 'package:marketlens360mobile/features/stock_detail/presentation/stock_detail_screen.dart';
 import 'package:marketlens360mobile/services/auth_service.dart';
 import 'app_routes.dart';
@@ -99,11 +100,15 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: AppRoutes.aiChat,
             builder: (_, __) => const AiChatScreen(),
           ),
-          GoRoute(
-            path: AppRoutes.profile,
-            builder: (_, __) => const ProfileScreen(),
-          ),
         ],
+      ),
+      GoRoute(
+        path: AppRoutes.profile,
+        builder: (_, __) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.settings,
+        builder: (_, __) => const SettingsScreen(),
       ),
     ],
   );

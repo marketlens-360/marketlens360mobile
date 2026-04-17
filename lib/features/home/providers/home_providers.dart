@@ -40,17 +40,19 @@ class HomeNotifier extends ChangeNotifier {
     _notifyListeners();
     try {
       final results = await Future.wait([
-        _repo.getMarketOverview(),
         _repo.getIndices(),
         _repo.getTopGainers(limit: 5),
         _repo.getTopLosers(limit: 5),
       ]);
       if (_disposed) return;
-      _overview = results[0] as MarketOverview;
-      _indices  = results[1] as List<MarketIndex>;
-      _gainers  = results[2] as List<Security>;
-      _losers   = results[3] as List<Security>;
-      _error    = null;
+      _indices = results[0] as List<MarketIndex>;
+      _gainers = results[1] as List<Security>;
+      _losers  = results[2] as List<Security>;
+      _error   = null;
+      // Market overview uses a different schema — non-critical.
+      _repo.getMarketOverview()
+          .then((v) { if (!_disposed) { _overview = v; _notifyListeners(); } })
+          .catchError((_) {});
     } catch (e) {
       if (_disposed) return;
       _error = e.toString();

@@ -54,32 +54,33 @@ abstract final class AppTextStyles {
         fontFeatures: FontService.numericFeatures,
       );
 
-  // ── Headline / Display styles (Manrope) ──────────────────────────────────────
+  // ── Headline / Display styles (Plus Jakarta Sans) ────────────────────────────
   static final TextStyle displayLg = _headline(
-    fontSize: 32,
+    fontSize: 34,
+    fontWeight: FontWeight.w800,
+    letterSpacing: -0.8,
+  );
+
+  static final TextStyle displayMd = _headline(
+    fontSize: 28,
     fontWeight: FontWeight.w800,
     letterSpacing: -0.5,
   );
 
-  static final TextStyle displayMd = _headline(
-    fontSize: 24,
-    fontWeight: FontWeight.w800,
+  static final TextStyle titleLg = _headline(
+    fontSize: 22,
+    fontWeight: FontWeight.w700,
     letterSpacing: -0.3,
   );
 
-  static final TextStyle titleLg = _headline(
-    fontSize: 20,
-    fontWeight: FontWeight.w700,
-    letterSpacing: -0.2,
-  );
-
   static final TextStyle titleMd = _headline(
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: FontWeight.w700,
+    letterSpacing: -0.1,
   );
 
   static final TextStyle titleSm = _headline(
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: FontWeight.w600,
   );
 
@@ -121,7 +122,7 @@ abstract final class AppTextStyles {
     color: AppColors.textMuted,
   );
 
-  // ── UI labels (Inter/PlusJakartaSans) ────────────────────────────────────────
+  // ── UI labels (Plus Jakarta Sans) ────────────────────────────────────────────
   static final TextStyle screenTitle = _base(
     fontSize: 16,
     fontWeight: FontWeight.w500,

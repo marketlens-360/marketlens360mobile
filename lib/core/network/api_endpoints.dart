@@ -11,8 +11,8 @@ abstract final class ApiEndpoints {
   static String metricsHistory(String symbol)  => '/securities/$symbol/metrics/history';
 
   // ── Market ───────────────────────────────────────────────────────────────
-  static const String indices       = '/market/indices';
-  static String indexHistory(String code) => '/market/indices/$code/history';
+  static const String indices       = '/indices';
+  static String indexHistory(String code) => '/indices/$code/history';
   static const String marketOverview = '/market/overview';
   static const String topGainers    = '/market/top-gainers';
   static const String topLosers     = '/market/top-losers';
@@ -52,5 +52,5 @@ abstract final class ApiEndpoints {
   static String fundRank(int fundId)     => '/fund-rankings/$fundId';
   static String rankingTrends(int fundId) => '/fund-rankings/$fundId/trends';
   static String rankingsByCategory(String category) => '/fund-rankings/category/$category';
-  static const String fundMarketStats   = '/fund-rankings/market-stats';
+  static const String fundMarketStats   = '/funds/rankings/market-overview';
 }

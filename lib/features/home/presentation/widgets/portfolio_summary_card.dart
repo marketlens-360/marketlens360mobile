@@ -16,7 +16,7 @@ class PortfolioSummaryCard extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
         color: c.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+        borderRadius: AppSpacing.cardRadius,
         border: Border.all(color: c.border, width: 1),
       ),
       child: Column(

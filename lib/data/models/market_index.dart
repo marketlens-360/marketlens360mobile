@@ -16,9 +16,9 @@ class MarketIndex {
   final String? date;
 
   factory MarketIndex.fromJson(Map<String, dynamic> j) => MarketIndex(
-        code: j['code'] as String,
-        name: j['name'] as String?,
-        value: (j['value'] as num?)?.toDouble(),
+        code: (j['index_code'] ?? j['code'] ?? '') as String,
+        name: (j['index_name'] ?? j['name']) as String?,
+        value: ((j['current_value'] ?? j['base_value'] ?? j['value']) as num?)?.toDouble(),
         changePercent: (j['change_percent'] as num?)?.toDouble(),
         changeAmount: (j['change_amount'] as num?)?.toDouble(),
         date: j['date'] as String?,

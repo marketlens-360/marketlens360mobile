@@ -17,6 +17,7 @@ class AppCard extends StatelessWidget {
     this.borderColor,
     this.addBorder = true,
     this.elevation = 0,
+    this.shadows,
     this.margin,
     this.clipBehavior = Clip.antiAlias,
   });
@@ -27,6 +28,7 @@ class AppCard extends StatelessWidget {
   final Color? borderColor;
   final bool addBorder;
   final double elevation;
+  final List<BoxShadow>? shadows;
   final EdgeInsetsGeometry? margin;
   final Clip clipBehavior;
 
@@ -37,21 +39,52 @@ class AppCard extends StatelessWidget {
     final resolvedColor = color ?? c.surfaceContainerLowest;
     final resolvedBorder = addBorder ? (borderColor ?? c.border) : null;
 
+    final defaultShadow = isDark
+        ? BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            offset: const Offset(0, 4),
+            blurRadius: 16,
+            spreadRadius: -4,
+          )
+        : BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            offset: const Offset(0, 2),
+            blurRadius: 12,
+            spreadRadius: -4,
+          );
+
+    final finalShadows = shadows ??
+        (elevation > 0
+            ? [
+                isDark
+                    ? BoxShadow(
+                        color: Colors.black.withOpacity(0.4),
+                        offset: Offset(0, elevation),
+                        blurRadius: elevation * 2,
+                      )
+                    : BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        offset: Offset(0, elevation),
+                        blurRadius: elevation * 2.5,
+                        spreadRadius: -elevation * 0.5,
+                      )
+              ]
+            : [defaultShadow]);
+
     return Padding(
       padding: margin ?? EdgeInsets.zero,
-      child: Material(
-        borderRadius: AppSpacing.cardRadius,
-        elevation: elevation,
-        color: resolvedColor,
+      child: Container(
         clipBehavior: clipBehavior,
-        shadowColor: isDark ? Colors.black54 : Colors.black12,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: AppSpacing.cardRadius,
-            border: resolvedBorder != null
-                ? Border.all(color: resolvedBorder, width: 1)
-                : null,
-          ),
+        decoration: BoxDecoration(
+          borderRadius: AppSpacing.cardRadius,
+          color: resolvedColor,
+          boxShadow: finalShadows,
+          border: resolvedBorder != null
+              ? Border.all(color: resolvedBorder, width: 1)
+              : null,
+        ),
+        child: Material(
+          type: MaterialType.transparency,
           child: SmoothHeightContainer(
             child: padding != null
                 ? Padding(padding: padding!, child: child)
@@ -149,14 +182,28 @@ class AppPrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    return SizedBox(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return Container(
       width: double.infinity,
       height: 48,
+      decoration: BoxDecoration(
+        borderRadius: AppSpacing.cardRadius,
+        boxShadow: [
+          BoxShadow(
+            color: c.primary.withOpacity(isDark ? 0.3 : 0.2),
+            offset: const Offset(0, 4),
+            blurRadius: 12,
+            spreadRadius: -2,
+          ),
+        ],
+      ),
       child: FilledButton(
         onPressed: isLoading ? null : onPressed,
         style: FilledButton.styleFrom(
           backgroundColor: c.primary,
           foregroundColor: Colors.white,
+          elevation: 0, // Removes the harsh default material elevation so glow shines
           shape: RoundedRectangleBorder(
             borderRadius: AppSpacing.cardRadius,
           ),
