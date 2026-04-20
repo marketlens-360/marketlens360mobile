@@ -203,6 +203,8 @@ class AppPrimaryButton extends StatelessWidget {
         style: FilledButton.styleFrom(
           backgroundColor: c.primary,
           foregroundColor: Colors.white,
+          disabledBackgroundColor: c.primary,
+          disabledForegroundColor: Colors.white,
           elevation: 0, // Removes the harsh default material elevation so glow shines
           shape: RoundedRectangleBorder(
             borderRadius: AppSpacing.cardRadius,

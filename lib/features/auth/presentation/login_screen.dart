@@ -6,6 +6,7 @@ import 'package:marketlens360mobile/core/router/app_routes.dart';
 import 'package:marketlens360mobile/core/theme/app_colors.dart';
 import 'package:marketlens360mobile/core/theme/app_spacing.dart';
 import 'package:marketlens360mobile/core/theme/app_text_styles.dart';
+import 'package:marketlens360mobile/core/widgets/app_card.dart';
 import 'package:marketlens360mobile/features/auth/providers/auth_providers.dart';
 import 'package:marketlens360mobile/services/icon_service.dart';
 import 'widgets/google_sign_in_button.dart';
@@ -31,12 +32,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c         = AppColors.of(context);
     final auth      = ref.watch(authProvider);
     final isLoading = auth.isLoading;
     final error     = auth.error;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(
@@ -51,8 +52,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant,
+                  color: c.primaryDim,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  border: Border.all(
+                    color: c.primary.withOpacity(0.2),
+                    width: 1,
+                  ),
                 ),
                 padding: const EdgeInsets.all(AppSpacing.sm),
                 child: Image.asset(
@@ -61,15 +66,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
-              Text('MarketLens360',
-                  style: AppTextStyles.screenTitle.copyWith(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                  )),
+              Text(
+                'MarketLens360',
+                style: AppTextStyles.screenTitle.copyWith(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: c.textPrimary,
+                ),
+              ),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 "Kenya's market intelligence platform",
-                style: AppTextStyles.labelSm,
+                style: AppTextStyles.labelSm.copyWith(color: c.textSecondary),
               ),
               const SizedBox(height: AppSpacing.xxl + AppSpacing.lg),
 
@@ -78,10 +86,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Welcome back',
-                  style: AppTextStyles.priceLarge.copyWith(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: AppTextStyles.titleLg.copyWith(color: c.textPrimary),
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
@@ -89,7 +94,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Sign in to your account to continue',
-                  style: AppTextStyles.body,
+                  style: AppTextStyles.body.copyWith(color: c.textSecondary),
                 ),
               ),
               const SizedBox(height: AppSpacing.xxl),
@@ -117,11 +122,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   hintText: 'Enter your password',
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscurePassword
-                          ? IconService.eye
-                          : IconService.eyeOff,
+                      _obscurePassword ? IconService.eye : IconService.eyeOff,
                       size: 18,
-                      color: AppColors.textMuted,
+                      color: c.textMuted,
                     ),
                     onPressed: () =>
                         setState(() => _obscurePassword = !_obscurePassword),
@@ -143,9 +146,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   child: Text(
                     'Forgot password?',
-                    style: AppTextStyles.labelSm.copyWith(
-                      color: AppColors.accent,
-                    ),
+                    style: AppTextStyles.labelSm.copyWith(color: c.primary),
                   ),
                 ),
               ),
@@ -153,43 +154,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
               // ── Error message ────────────────────────────────────────────
               if (error != null) ...[
-                Text(error,
-                    style: AppTextStyles.labelSm
-                        .copyWith(color: AppColors.priceDown)),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: c.priceDownDim,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                    border: Border.all(color: c.priceDown.withOpacity(0.3)),
+                  ),
+                  child: Text(
+                    error,
+                    style: AppTextStyles.labelSm.copyWith(color: c.priceDown),
+                  ),
+                ),
                 const SizedBox(height: AppSpacing.md),
               ],
 
               // ── Sign In button ───────────────────────────────────────────
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.surfaceVariant,
-                    foregroundColor: AppColors.textPrimary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
-                    ),
-                  ),
-                  onPressed: isLoading
-                      ? null
-                      : () => ref.read(authProvider).signInWithEmail(
-                            _emailCtrl.text.trim(),
-                            _passwordCtrl.text,
-                          ),
-                  child: isLoading
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white),
-                        )
-                      : Text('Sign in',
-                          style: AppTextStyles.labelLg.copyWith(
-                            fontWeight: FontWeight.w600,
-                          )),
-                ),
+              AppPrimaryButton(
+                label: 'Sign in',
+                isLoading: isLoading,
+                onPressed: isLoading
+                    ? null
+                    : () => ref.read(authProvider).signInWithEmail(
+                          _emailCtrl.text.trim(),
+                          _passwordCtrl.text,
+                        ),
               ),
               const SizedBox(height: AppSpacing.xl),
 
@@ -204,31 +194,49 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               // ── Create account ───────────────────────────────────────────
               Text(
                 'New to MarketLens360?',
-                style: AppTextStyles.labelSm,
+                style: AppTextStyles.labelSm.copyWith(color: c.textSecondary),
               ),
               const SizedBox(height: AppSpacing.sm),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.borderMedium),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
-                    ),
-                    foregroundColor: AppColors.textPrimary,
-                  ),
-                  onPressed: () => context.push(AppRoutes.register),
-                  child: Text(
-                    'Create a free account',
-                    style: AppTextStyles.labelLg.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
+              _TonalButton(
+                label: 'Create a free account',
+                onPressed: () => context.push(AppRoutes.register),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Shared private widgets ────────────────────────────────────────────────────
+
+/// A secondary button with a blue border and blue text — no fill.
+class _TonalButton extends StatelessWidget {
+  const _TonalButton({required this.label, required this.onPressed});
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: c.primary,
+          side: BorderSide(color: c.primary, width: 1.5),
+          shape: RoundedRectangleBorder(borderRadius: AppSpacing.cardRadius),
+          overlayColor: c.primaryDim,
+        ),
+        onPressed: onPressed,
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: c.primary,
           ),
         ),
       ),
@@ -248,7 +256,7 @@ class _FieldLabel extends StatelessWidget {
         text,
         style: AppTextStyles.sectionLabel.copyWith(
           letterSpacing: 0.8,
-          color: AppColors.textMuted,
+          color: AppColors.of(context).textMuted,
         ),
       ),
     );
@@ -260,14 +268,18 @@ class _OrDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return Row(
       children: [
-        const Expanded(child: Divider(color: AppColors.borderMedium)),
+        Expanded(child: Divider(color: c.borderMedium)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          child: Text('or', style: AppTextStyles.labelSm),
+          child: Text(
+            'or',
+            style: AppTextStyles.labelSm.copyWith(color: c.textMuted),
+          ),
         ),
-        const Expanded(child: Divider(color: AppColors.borderMedium)),
+        Expanded(child: Divider(color: c.borderMedium)),
       ],
     );
   }
