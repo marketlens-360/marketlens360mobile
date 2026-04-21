@@ -22,28 +22,34 @@ class PriceChangeBadge extends StatelessWidget {
     final isPositive = value >= 0;
     final bg     = isPositive ? c.priceUpDim  : c.priceDownDim;
     final fg     = isPositive ? c.priceUp     : c.priceDown;
-    final border = isPositive
-        ? c.priceUp.withAlpha(51)   // ~20%
-        : c.priceDown.withAlpha(51);
     final text = showSign ? Fmt.pct(value) : Fmt.pctAbs(value);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: border, width: 1),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
       ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontFamily: FontService.numeric,
-          fontSize: fontSize,
-          fontWeight: FontWeight.w500,
-          color: fg,
-          fontFeatures: FontService.numericFeatures,
-          height: 1.2,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isPositive ? Icons.arrow_drop_up : Icons.arrow_drop_down,
+            size: fontSize + 3,
+            color: fg,
+          ),
+          Text(
+            text,
+            style: TextStyle(
+              fontFamily: FontService.numeric,
+              fontSize: fontSize,
+              fontWeight: FontWeight.w600,
+              color: fg,
+              fontFeatures: FontService.numericFeatures,
+              height: 1.2,
+            ),
+          ),
+        ],
       ),
     );
   }

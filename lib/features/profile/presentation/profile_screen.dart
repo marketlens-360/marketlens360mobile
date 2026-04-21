@@ -337,7 +337,7 @@ class _HeroCard extends StatelessWidget {
       width: double.infinity,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: c.primary,
+        gradient: c.heroGradient,
         borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
       ),
       child: Stack(

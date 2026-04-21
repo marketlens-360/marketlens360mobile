@@ -33,7 +33,7 @@ class AppShellBar extends ConsumerWidget implements PreferredSizeWidget {
     return _ShadowedBar(
       isDark: isDark,
       child: AppBar(
-        backgroundColor: isDark ? c.surface : c.surfaceContainerLowest,
+        backgroundColor: c.background,
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
@@ -47,12 +47,26 @@ class AppShellBar extends ConsumerWidget implements PreferredSizeWidget {
               ref.read(shellScaffoldKeyProvider).currentState?.openDrawer(),
         ),
         titleSpacing: 0,
-        title: Text(
-          'MarketLens360',
-          style: AppTextStyles.titleMd.copyWith(
-            color: c.primary,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.5,
+        title: RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: 'MarketLens',
+                style: AppTextStyles.titleMd.copyWith(
+                  color: c.textPrimary,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              TextSpan(
+                text: '360',
+                style: AppTextStyles.titleMd.copyWith(
+                  color: c.primary,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                ),
+              ),
+            ],
           ),
         ),
         actions: [
@@ -104,7 +118,7 @@ class AppDetailBar extends StatelessWidget implements PreferredSizeWidget {
     return _ShadowedBar(
       isDark: isDark,
       child: AppBar(
-        backgroundColor: isDark ? c.surface : c.surfaceContainerLowest,
+        backgroundColor: c.background,
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,

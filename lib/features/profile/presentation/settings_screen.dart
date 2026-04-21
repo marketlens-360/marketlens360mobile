@@ -114,47 +114,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ],
           ),
 
-          if (authUser != null) ...[
-            const SizedBox(height: AppSpacing.xl),
-
-            // ── App info ──────────────────────────────────────────────────
-            const _SectionLabel('APP'),
-            const SizedBox(height: AppSpacing.sm),
-            _SectionCard(
-              children: [
-                _ActionTileRow(
-                  icon: LucideIcons.hash,
-                  label: 'Account ID',
-                  subtitle: '${authUser.uid.substring(0, 8)}…',
-                  trailingLabel: 'COPY',
-                  trailingColor: c.primary,
-                  onTap: () {
-                    Clipboard.setData(ClipboardData(text: authUser.uid));
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('UID copied',
-                            style: TextStyle(color: c.textPrimary)),
-                        backgroundColor: c.surface,
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ],
-
           const SizedBox(height: AppSpacing.xxl),
-
-          // ── Terminate session ─────────────────────────────────────────────
-          _TerminateButton(
-            isLoading: _isTerminating,
-            onTap: () => _signOut(context),
-          ),
-
-          const SizedBox(height: AppSpacing.xl),
-
-          // ── Footer ────────────────────────────────────────────────────────
           const _Footer(),
 
           const SizedBox(height: AppSpacing.xxl * 2),

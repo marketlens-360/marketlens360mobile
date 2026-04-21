@@ -93,10 +93,7 @@ class FundsScreen extends ConsumerWidget {
                     onRetry: () => ref.read(fundsProvider).refresh(),
                   )
                 else
-                  ...funds.funds.map((f) => Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                        child: FundListTile(fund: f),
-                      )),
+                  ...funds.funds.map((f) => FundListTile(fund: f)),
 
                 const SizedBox(height: 16),
                 const _MarketSentimentModule(),
@@ -174,19 +171,9 @@ class _CategoryChips extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
                 decoration: BoxDecoration(
-                  color:
-                      isSelected ? c.primary : c.surfaceContainerHigh,
+                  color: isSelected ? c.primary : c.surfaceContainerHigh,
                   borderRadius:
-                      BorderRadius.circular(AppSpacing.radiusLg),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: c.primary.withAlpha(55),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3),
-                          ),
-                        ]
-                      : null,
+                      BorderRadius.circular(AppSpacing.radiusPill),
                 ),
                 child: Text(
                   label.toUpperCase(),
@@ -217,7 +204,7 @@ class _ComparisonCta extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: c.primaryContainer,
+        gradient: c.aiGradient,
         borderRadius: AppSpacing.cardRadius,
       ),
       child: Column(

@@ -28,7 +28,7 @@ class PriceHeader extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: c.primaryContainer,
+                  color: c.primary,
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(

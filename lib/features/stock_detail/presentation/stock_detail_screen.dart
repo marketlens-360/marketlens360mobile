@@ -261,7 +261,7 @@ class _AiCard extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: c.primaryContainer,
+        gradient: c.aiGradient,
         borderRadius: AppSpacing.cardRadius,
       ),
       child: Column(
@@ -334,7 +334,7 @@ class _AiRow extends StatelessWidget {
               child: Text(
                 value,
                 style: AppTextStyles.sectionLabel.copyWith(
-                  color: const Color(0xFF004AC6),
+                  color: AppColors.of(context).primary,
                   fontSize: 10,
                 ),
               ),

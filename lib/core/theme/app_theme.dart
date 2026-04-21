@@ -74,35 +74,35 @@ abstract final class AppTheme {
             horizontal: AppSpacing.md, vertical: AppSpacing.sm,
           ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            borderSide: BorderSide(color: c.borderMedium, width: 1),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            borderSide: BorderSide.none,
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            borderSide: BorderSide(color: c.borderMedium, width: 1),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            borderSide: BorderSide.none,
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            borderSide: BorderSide(color: c.primary, width: 2),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            borderSide: BorderSide(color: c.primary, width: 1.5),
           ),
           errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             borderSide: BorderSide(color: c.priceDown, width: 1),
           ),
           focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            borderSide: BorderSide(color: c.priceDown, width: 2),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            borderSide: BorderSide(color: c.priceDown, width: 1.5),
           ),
           hintStyle: TextStyle(
-            fontFamily: FontService.primary, fontSize: 13, color: c.textMuted,
+            fontFamily: FontService.primary, fontSize: 14, color: c.textMuted,
           ),
         ),
         chipTheme: ChipThemeData(
           backgroundColor: Colors.transparent,
-          selectedColor: c.primaryDim,
+          selectedColor: c.primary,
           side: BorderSide(color: c.borderMedium, width: 0.5),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
           ),
           labelStyle: TextStyle(
             fontFamily: FontService.primary, fontSize: 12, color: c.textSecondary,
@@ -132,24 +132,24 @@ abstract final class AppTheme {
             backgroundColor: c.primary,
             foregroundColor: Colors.white,
             textStyle: TextStyle(
-              fontFamily: FontService.primary, fontSize: 13, fontWeight: FontWeight.w700,
+              fontFamily: FontService.primary, fontSize: 14, fontWeight: FontWeight.w700,
               letterSpacing: 0.5,
             ),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
             minimumSize: const Size(double.infinity, 48),
           ),
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
-            foregroundColor: c.textPrimary,
-            side: BorderSide(color: c.borderMedium),
+            foregroundColor: c.primary,
+            side: BorderSide(color: c.primary, width: 1.5),
             textStyle: TextStyle(
-              fontFamily: FontService.primary, fontSize: 13, fontWeight: FontWeight.w600,
+              fontFamily: FontService.primary, fontSize: 14, fontWeight: FontWeight.w600,
             ),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
             minimumSize: const Size(double.infinity, 48),
           ),
@@ -168,10 +168,10 @@ abstract final class AppTheme {
           labelSmall:  TextStyle(fontFamily: FontService.primary, fontSize: 10, letterSpacing: 0.8, color: c.textMuted),
         ),
         cardTheme: CardThemeData(
-          color: c.surfaceContainerLowest,
+          color: c.surface,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
             side: BorderSide(color: c.border, width: 1),
           ),
           margin: EdgeInsets.zero,

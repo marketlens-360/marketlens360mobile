@@ -56,7 +56,7 @@ abstract final class AppTextStyles {
 
   // ── Headline / Display styles (Plus Jakarta Sans) ────────────────────────────
   static final TextStyle displayLg = _headline(
-    fontSize: 34,
+    fontSize: 32,
     fontWeight: FontWeight.w800,
     letterSpacing: -0.8,
   );
@@ -73,6 +73,13 @@ abstract final class AppTextStyles {
     letterSpacing: -0.3,
   );
 
+  /// 17px — matches design spec "Title M"
+  static final TextStyle titleM = _headline(
+    fontSize: 17,
+    fontWeight: FontWeight.w700,
+    letterSpacing: -0.2,
+  );
+
   static final TextStyle titleMd = _headline(
     fontSize: 18,
     fontWeight: FontWeight.w700,
@@ -86,8 +93,8 @@ abstract final class AppTextStyles {
 
   // ── Price & financial numeric styles ─────────────────────────────────────────
   static final TextStyle priceLarge = _numeric(
-    fontSize: 26,
-    fontWeight: FontWeight.w500,
+    fontSize: 28,
+    fontWeight: FontWeight.w700,
     letterSpacing: -0.5,
     height: FontService.compactHeight,
   );
@@ -129,7 +136,7 @@ abstract final class AppTextStyles {
   );
 
   static final TextStyle labelLg = _base(
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: FontWeight.w500,
   );
 
@@ -152,7 +159,7 @@ abstract final class AppTextStyles {
   );
 
   static final TextStyle body = _base(
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: FontWeight.w400,
     color: AppColors.textSecondary,
     height: FontService.bodyHeight,

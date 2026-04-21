@@ -95,19 +95,18 @@ class _MarketPulseSection extends ConsumerWidget {
         // Card
         Container(
           decoration: BoxDecoration(
-            color: isDark ? c.surfaceContainer : c.surfaceContainerLowest,
+            color: c.surface,
             borderRadius: AppSpacing.cardRadius,
-            border: Border.all(
-              color: isDark ? c.border : c.borderMedium.withAlpha(60),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: c.primary.withAlpha(isDark ? 20 : 12),
-                blurRadius: 24,
-                offset: const Offset(0, 8),
-              ),
-            ],
+            border: Border.all(color: c.border, width: 1),
+            boxShadow: isDark
+                ? null
+                : [
+                    const BoxShadow(
+                      color: Color(0x0A0F172A),
+                      offset: Offset(0, 1),
+                      blurRadius: 3,
+                    ),
+                  ],
           ),
           padding: const EdgeInsets.all(18),
           child: Column(
@@ -214,7 +213,7 @@ class _SparkBars extends StatelessWidget {
   Widget build(BuildContext context) {
     final c      = AppColors.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final barColor    = isDark ? const Color(0xFF1A2540) : const Color(0xFFDCE9FF);
+    final barColor    = isDark ? const Color(0xFF1E2D3D) : const Color(0xFFDBEAFE);
     final activeColor = c.primary;
 
     final heights    = [0.5, 0.67, 0.33, 0.5, 0.75, 1.0, 0.8, 0.4, 0.5, 0.6, 0.4, 0.83, 1.0];
@@ -313,22 +312,8 @@ class _AiAnalysisCard extends StatelessWidget {
         height: 192,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              c.primaryContainer,
-              c.primary,
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          gradient: c.aiGradient,
           borderRadius: AppSpacing.cardRadius,
-          boxShadow: [
-            BoxShadow(
-              color: c.primary.withAlpha(60),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
         ),
         child: Stack(
           children: [
@@ -441,18 +426,18 @@ class _SmallBentoCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isDark ? c.surfaceContainer : c.surfaceContainerLowest,
+          color: c.surface,
           borderRadius: AppSpacing.cardRadius,
-          border: Border.all(
-            color: isDark ? c.border : c.borderMedium.withAlpha(60),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(8),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          border: Border.all(color: c.border, width: 1),
+          boxShadow: isDark
+              ? null
+              : [
+                  const BoxShadow(
+                    color: Color(0x0A0F172A),
+                    offset: Offset(0, 1),
+                    blurRadius: 3,
+                  ),
+                ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -510,8 +495,9 @@ class _SmallBentoCard extends StatelessWidget {
 class _TrendingStocksSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final c    = AppColors.of(context);
-    final home = ref.watch(homeProvider);
+    final c      = AppColors.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final home   = ref.watch(homeProvider);
 
     return Column(
       children: [
@@ -545,18 +531,18 @@ class _TrendingStocksSection extends ConsumerWidget {
         else
           Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? c.surfaceContainer
-                  : c.surfaceContainerLowest,
+              color: c.surface,
               borderRadius: AppSpacing.cardRadius,
-              border: Border.all(color: c.borderMedium.withAlpha(60)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(8),
-                  blurRadius: 16,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              border: Border.all(color: c.border, width: 1),
+              boxShadow: isDark
+                  ? null
+                  : [
+                      const BoxShadow(
+                        color: Color(0x0A0F172A),
+                        offset: Offset(0, 1),
+                        blurRadius: 3,
+                      ),
+                    ],
             ),
             child: ListView.separated(
               shrinkWrap: true,
@@ -597,7 +583,7 @@ class _TrendingStockRow extends StatelessWidget {
   final double? changePercent;
 
   static const _avatarColors = [
-    Color(0xFF004AC6),
+    Color(0xFF2563EB),
     Color(0xFF7C3AED),
     Color(0xFFDB2777),
     Color(0xFF0D9488),
@@ -683,19 +669,19 @@ class _TrendingStockRow extends StatelessWidget {
 class _AcademyPromo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final c      = AppColors.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark
-            ? c.primary.withAlpha(15)
-            : c.surfaceContainerLowest,
-        borderRadius: AppSpacing.cardRadius,
-        border: Border.all(
-          color: c.primary.withAlpha(isDark ? 50 : 40),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark
+              ? const [Color(0xFF1e1b4b), Color(0xFF312e81)]
+              : const [Color(0xFF4338CA), Color(0xFF3730A3)],
         ),
+        borderRadius: AppSpacing.cardRadius,
       ),
       child: Row(
         children: [
@@ -706,7 +692,7 @@ class _AcademyPromo extends StatelessWidget {
                 Text(
                   'Financial Architect Academy',
                   style: AppTextStyles.titleSm.copyWith(
-                    color: isDark ? const Color(0xFFBFD4FF) : c.primary,
+                    color: Colors.white,
                     fontWeight: FontWeight.w700,
                     fontSize: 17,
                   ),
@@ -715,7 +701,7 @@ class _AcademyPromo extends StatelessWidget {
                 Text(
                   'Master the art of high-precision trading with our premium guides.',
                   style: AppTextStyles.body.copyWith(
-                    color: c.textMuted,
+                    color: Colors.white.withAlpha(200),
                     fontSize: 13,
                     height: 1.5,
                   ),
@@ -728,17 +714,17 @@ class _AcademyPromo extends StatelessWidget {
                     children: [
                       Text(
                         'Enroll for Free',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
-                          color: c.primary,
+                          color: Colors.white,
                         ),
                       ),
                       const SizedBox(width: 4),
-                      Icon(
+                      const Icon(
                         IconService.chevronRight,
                         size: 14,
-                        color: c.primary,
+                        color: Colors.white,
                       ),
                     ],
                   ),
@@ -753,15 +739,15 @@ class _AcademyPromo extends StatelessWidget {
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                color: c.primary.withAlpha(18),
+                color: Colors.white.withAlpha(28),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                border: Border.all(color: c.primary.withAlpha(40)),
+                border: Border.all(color: Colors.white.withAlpha(60)),
               ),
               alignment: Alignment.center,
-              child: Icon(
+              child: const Icon(
                 IconService.education,
                 size: 32,
-                color: c.primary,
+                color: Colors.white,
               ),
             ),
           ),

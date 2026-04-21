@@ -161,7 +161,7 @@ class MarketsScreen extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.all(AppSpacing.md),
                         decoration: BoxDecoration(
-                          color: c.primaryContainer,
+                          gradient: c.heroGradient,
                           borderRadius: AppSpacing.cardRadius,
                         ),
                         child: Column(
@@ -191,8 +191,8 @@ class MarketsScreen extends ConsumerWidget {
                                   height: 7,
                                   decoration: BoxDecoration(
                                     color: marketOpen
-                                        ? const Color(0xFF4ADE80)
-                                        : const Color(0xFFF87171),
+                                        ? c.priceUp
+                                        : c.priceDown,
                                     shape: BoxShape.circle,
                                   ),
                                 ),
@@ -287,12 +287,11 @@ class MarketsScreen extends ConsumerWidget {
                 ),
               )
             else
-              SliverList.separated(
-                itemCount: securities.length,
-                separatorBuilder: (_, __) =>
-                    Divider(color: c.border, height: 1),
-                itemBuilder: (_, i) =>
-                    SecurityListTile(security: securities[i]),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (_, i) => SecurityListTile(security: securities[i]),
+                  childCount: securities.length,
+                ),
               ),
           ],
         ),
@@ -351,16 +350,7 @@ class _FilterChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
         decoration: BoxDecoration(
           color: isSelected ? c.primary : c.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: c.primary.withAlpha(55),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ]
-              : null,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
         ),
         child: Text(
           label,

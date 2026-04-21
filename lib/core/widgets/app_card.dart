@@ -39,37 +39,39 @@ class AppCard extends StatelessWidget {
     final resolvedColor = color ?? c.surfaceContainerLowest;
     final resolvedBorder = addBorder ? (borderColor ?? c.border) : null;
 
-    final defaultShadow = isDark
-        ? BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            offset: const Offset(0, 4),
-            blurRadius: 16,
-            spreadRadius: -4,
-          )
-        : BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            offset: const Offset(0, 2),
-            blurRadius: 12,
-            spreadRadius: -4,
-          );
+    // Design spec: light mode = subtle shadow; dark mode = no shadow
+    final defaultShadows = isDark
+        ? <BoxShadow>[]
+        : <BoxShadow>[
+            const BoxShadow(
+              color: Color(0x0A0F172A),  // rgba(15,23,42,0.04)
+              offset: Offset(0, 1),
+              blurRadius: 3,
+            ),
+            const BoxShadow(
+              color: Color(0x080F172A),  // rgba(15,23,42,0.03)
+              offset: Offset(0, 1),
+              blurRadius: 2,
+            ),
+          ];
 
     final finalShadows = shadows ??
         (elevation > 0
             ? [
                 isDark
                     ? BoxShadow(
-                        color: Colors.black.withOpacity(0.4),
+                        color: Colors.black.withAlpha(100),
                         offset: Offset(0, elevation),
                         blurRadius: elevation * 2,
                       )
                     : BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
+                        color: Colors.black.withAlpha(20),
                         offset: Offset(0, elevation),
                         blurRadius: elevation * 2.5,
                         spreadRadius: -elevation * 0.5,
                       )
               ]
-            : [defaultShadow]);
+            : defaultShadows);
 
     return Padding(
       padding: margin ?? EdgeInsets.zero,
@@ -182,22 +184,9 @@ class AppPrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    return Container(
+    return SizedBox(
       width: double.infinity,
       height: 48,
-      decoration: BoxDecoration(
-        borderRadius: AppSpacing.cardRadius,
-        boxShadow: [
-          BoxShadow(
-            color: c.primary.withOpacity(isDark ? 0.3 : 0.2),
-            offset: const Offset(0, 4),
-            blurRadius: 12,
-            spreadRadius: -2,
-          ),
-        ],
-      ),
       child: FilledButton(
         onPressed: isLoading ? null : onPressed,
         style: FilledButton.styleFrom(
@@ -205,9 +194,9 @@ class AppPrimaryButton extends StatelessWidget {
           foregroundColor: Colors.white,
           disabledBackgroundColor: c.primary,
           disabledForegroundColor: Colors.white,
-          elevation: 0, // Removes the harsh default material elevation so glow shines
+          elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: AppSpacing.cardRadius,
+            borderRadius: AppSpacing.buttonRadius,
           ),
         ),
         child: isLoading

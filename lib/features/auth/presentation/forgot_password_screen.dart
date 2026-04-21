@@ -232,7 +232,7 @@ class _TonalButton extends StatelessWidget {
         style: OutlinedButton.styleFrom(
           foregroundColor: c.primary,
           side: BorderSide(color: c.primary, width: 1.5),
-          shape: RoundedRectangleBorder(borderRadius: AppSpacing.cardRadius),
+          shape: RoundedRectangleBorder(borderRadius: AppSpacing.buttonRadius),
           overlayColor: c.primaryDim,
         ),
         onPressed: onPressed,

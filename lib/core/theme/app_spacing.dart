@@ -16,12 +16,14 @@ abstract final class AppSpacing {
   // Card internal padding
   static const EdgeInsets cardPadding = EdgeInsets.all(16);
 
-  // Border radii — 12px is the primary card radius per design
-  static const double radiusSm   = 6;
-  static const double radiusMd   = 8;
-  static const double radiusLg   = 12;   // ← primary card radius
+  // Border radii
+  static const double radiusSm   = 6;   // badges, chips
+  static const double radiusMd   = 12;  // buttons, inputs
+  static const double radiusLg   = 12;  // buttons, inputs (kept as alias for radiusMd)
+  static const double radiusCard = 14;  // cards
   static const double radiusXl   = 16;
-  static const double radiusPill = 20;
+  static const double radiusPill = 20;  // filter chips, pill badges
 
-  static BorderRadius get cardRadius => BorderRadius.circular(radiusLg);
+  static BorderRadius get cardRadius => BorderRadius.circular(radiusCard);
+  static BorderRadius get buttonRadius => BorderRadius.circular(radiusMd);
 }

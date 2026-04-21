@@ -11,8 +11,8 @@ class ShimmerList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final base      = isDark ? const Color(0xFF1F2937) : const Color(0xFFE5E7EB);
-    final highlight = isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6);
+    final base      = isDark ? const Color(0xFF1E2D3D) : const Color(0xFFE2E8F0);
+    final highlight = isDark ? const Color(0xFF2A3F57) : const Color(0xFFF1F5F9);
 
     Widget buildItem() => Padding(
       padding: const EdgeInsets.symmetric(
@@ -69,8 +69,8 @@ class ShimmerRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark    = Theme.of(context).brightness == Brightness.dark;
-    final base      = isDark ? const Color(0xFF1F2937) : const Color(0xFFE5E7EB);
-    final highlight = isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6);
+    final base      = isDark ? const Color(0xFF1E2D3D) : const Color(0xFFE2E8F0);
+    final highlight = isDark ? const Color(0xFF2A3F57) : const Color(0xFFF1F5F9);
 
     return Shimmer.fromColors(
       baseColor: base,

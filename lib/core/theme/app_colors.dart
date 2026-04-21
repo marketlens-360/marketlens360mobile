@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 // ── Resolved color set (light or dark) ────────────────────────────────────────
 class AppColorsData {
   const AppColorsData({
+    required this.isDark,
     required this.background,
     required this.backgroundSection,
     required this.surface,
@@ -24,6 +25,7 @@ class AppColorsData {
     required this.priceDown,
     required this.priceDownDim,
     required this.warning,
+    required this.warningDim,
     required this.textPrimary,
     required this.textSecondary,
     required this.textMuted,
@@ -36,6 +38,7 @@ class AppColorsData {
     required this.inverseOnSurface,
   });
 
+  final bool isDark;
   final Color background;
   final Color backgroundSection;
   final Color surface;
@@ -57,6 +60,7 @@ class AppColorsData {
   final Color priceDown;
   final Color priceDownDim;
   final Color warning;
+  final Color warningDim;
   final Color textPrimary;
   final Color textSecondary;
   final Color textMuted;
@@ -68,72 +72,102 @@ class AppColorsData {
   final Color inverseSurface;
   final Color inverseOnSurface;
 
+  // ── Gradient helpers ─────────────────────────────────────────────────────────
+  LinearGradient get heroGradient => isDark
+      ? const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1d3578), Color(0xFF162a62), Color(0xFF101d47)],
+          stops: [0.0, 0.5, 1.0],
+        )
+      : const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF2563EB), Color(0xFF1E40AF)],
+        );
+
+  LinearGradient get aiGradient => isDark
+      ? const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1d3578), Color(0xFF101d47)],
+        )
+      : const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF2563EB), Color(0xFF1E40AF)],
+        );
+
   // ── Dark palette ──────────────────────────────────────────────────────────────
   static const dark = AppColorsData(
-    background:              Color(0xFF02060F),  // near-black
-    backgroundSection:       Color(0xFF0D1117),
-    surface:                 Color(0xFF0D1421),  // dark navy card
-    surfaceContainer:        Color(0xFF111D2E),
-    surfaceContainerLow:     Color(0xFF0A1020),
-    surfaceContainerHigh:    Color(0xFF1A2540),
-    surfaceContainerLowest:  Color(0xFF070E1A),
-    surfaceVariant:          Color(0x0DFFFFFF),  // white/5
-    primary:                 Color(0xFF4D8BF5),  // lightened blue for dark bg
-    primaryDim:              Color(0x1A4D8BF5),
-    primaryContainer:        Color(0xFF2563EB),
+    isDark:                  true,
+    background:              Color(0xFF0A0E1A),
+    backgroundSection:       Color(0xFF141927),
+    surface:                 Color(0xFF141927),
+    surfaceContainer:        Color(0xFF0D1424),
+    surfaceContainerLow:     Color(0xFF141927),
+    surfaceContainerHigh:    Color(0xFF1E2D3D),
+    surfaceContainerLowest:  Color(0xFF0D1424),  // input fill
+    surfaceVariant:          Color(0x0DFFFFFF),
+    primary:                 Color(0xFF3D7EFF),
+    primaryDim:              Color(0x1F3D7EFF),  // rgba(61,126,255,0.12)
+    primaryContainer:        Color(0xFF1d3578),  // hero gradient start
     onPrimaryContainer:      Color(0xFFEEEFFF),
-    secondary:               Color(0xFF34D399),  // green 400
-    secondaryDim:            Color(0x1A34D399),
-    tertiary:                Color(0xFFFBBF24),  // amber
-    tertiaryDim:             Color(0x1AFBBF24),
-    priceUp:                 Color(0xFF34D399),  // green 400
-    priceUpDim:              Color(0x1A34D399),
-    priceDown:               Color(0xFFF87171),  // red 400
-    priceDownDim:            Color(0x1AF87171),
-    warning:                 Color(0xFFFBBF24),
-    textPrimary:             Color(0xFFF1F5F9),  // slate-100
-    textSecondary:           Color(0xFF94A3B8),  // slate-400
-    textMuted:               Color(0xFF64748B),  // slate-500
-    textDisabled:            Color(0xFF334155),  // slate-700
-    border:                  Color(0x14FFFFFF),  // white/8
-    borderMedium:            Color(0x1FFFFFFF),  // white/12
-    outline:                 Color(0xFF475569),  // slate-600
-    outlineVariant:          Color(0x33FFFFFF),  // white/20
+    secondary:               Color(0xFF22C55E),
+    secondaryDim:            Color(0x1F22C55E),  // rgba(34,197,94,0.12)
+    tertiary:                Color(0xFFF59E0B),
+    tertiaryDim:             Color(0x1FF59E0B),
+    priceUp:                 Color(0xFF22C55E),
+    priceUpDim:              Color(0x1F22C55E),
+    priceDown:               Color(0xFFEF4444),
+    priceDownDim:            Color(0x1FEF4444),  // rgba(239,68,68,0.12)
+    warning:                 Color(0xFFF59E0B),
+    warningDim:              Color(0x1FF59E0B),  // rgba(245,158,11,0.12)
+    textPrimary:             Color(0xFFF1F5F9),
+    textSecondary:           Color(0xFF94A3B8),
+    textMuted:               Color(0xFF64748B),
+    textDisabled:            Color(0xFF334155),
+    border:                  Color(0xFF1E2D3D),
+    borderMedium:            Color(0xFF2A3F57),
+    outline:                 Color(0xFF475569),
+    outlineVariant:          Color(0xFF334155),
     inverseSurface:          Color(0xFFE2E8F0),
     inverseOnSurface:        Color(0xFF1E293B),
   );
 
   // ── Light palette ─────────────────────────────────────────────────────────────
   static const light = AppColorsData(
-    background:              Color(0xFFF7F9FB),
-    backgroundSection:       Color(0xFFF2F4F6),
-    surface:                 Color(0xFFF7F9FB),
-    surfaceContainer:        Color(0xFFECEEF0),
-    surfaceContainerLow:     Color(0xFFF2F4F6),
-    surfaceContainerHigh:    Color(0xFFE6E8EA),
-    surfaceContainerLowest:  Color(0xFFFFFFFF),
-    surfaceVariant:          Color(0xFFE0E3E5),
-    primary:                 Color(0xFF004AC6),  // brand blue
-    primaryDim:              Color(0x1A004AC6),
-    primaryContainer:        Color(0xFF2563EB),
+    isDark:                  false,
+    background:              Color(0xFFFFFFFF),
+    backgroundSection:       Color(0xFFF8FAFC),
+    surface:                 Color(0xFFFFFFFF),
+    surfaceContainer:        Color(0xFFF1F5F9),
+    surfaceContainerLow:     Color(0xFFF8FAFC),
+    surfaceContainerHigh:    Color(0xFFE2E8F0),
+    surfaceContainerLowest:  Color(0xFFF1F5F9),  // input fill (bg-tertiary)
+    surfaceVariant:          Color(0xFFE2E8F0),
+    primary:                 Color(0xFF2563EB),
+    primaryDim:              Color(0xFFDBEAFE),  // accent-subtle
+    primaryContainer:        Color(0xFF1E40AF),  // hero gradient end
     onPrimaryContainer:      Color(0xFFEEEFFF),
-    secondary:               Color(0xFF006C4A),  // green (profit)
-    secondaryDim:            Color(0x1A006C4A),
-    tertiary:                Color(0xFF943700),  // orange (warning)
-    tertiaryDim:             Color(0x1A943700),
-    priceUp:                 Color(0xFF059669),  // green 600
-    priceUpDim:              Color(0x1A059669),
-    priceDown:               Color(0xFFBA1A1A),  // red
-    priceDownDim:            Color(0x1ABA1A1A),
-    warning:                 Color(0xFFD97706),  // amber 600
-    textPrimary:             Color(0xFF191C1E),
-    textSecondary:           Color(0xFF434655),
-    textMuted:               Color(0xFF737686),
-    textDisabled:            Color(0xFFC3C6D7),
-    border:                  Color(0xFFE5E7EB),
-    borderMedium:            Color(0xFFC3C6D7),
-    outline:                 Color(0xFF737686),
-    outlineVariant:          Color(0xFFC3C6D7),
+    secondary:               Color(0xFF15803D),
+    secondaryDim:            Color(0xFFDCFCE7),  // success-bg
+    tertiary:                Color(0xFFB45309),
+    tertiaryDim:             Color(0xFFFEF3C7),  // warning-bg
+    priceUp:                 Color(0xFF15803D),
+    priceUpDim:              Color(0xFFDCFCE7),  // success-bg
+    priceDown:               Color(0xFFB91C1C),
+    priceDownDim:            Color(0xFFFEE2E2),  // danger-bg
+    warning:                 Color(0xFFB45309),
+    warningDim:              Color(0xFFFEF3C7),
+    textPrimary:             Color(0xFF0F172A),
+    textSecondary:           Color(0xFF475569),
+    textMuted:               Color(0xFF64748B),
+    textDisabled:            Color(0xFF94A3B8),
+    border:                  Color(0xFFE2E8F0),
+    borderMedium:            Color(0xFFCBD5E1),
+    outline:                 Color(0xFF64748B),
+    outlineVariant:          Color(0xFFCBD5E1),
     inverseSurface:          Color(0xFF2D3133),
     inverseOnSurface:        Color(0xFFEFF1F3),
   );
@@ -159,23 +193,23 @@ class AppColorsTheme extends ThemeExtension<AppColorsTheme> {
 
 // ── Static dark constants — backward compat ────────────────────────────────────
 abstract final class AppColors {
-  static const Color background        = Color(0xFF02060F);
-  static const Color surface           = Color(0xFF0D1421);
+  static const Color background        = Color(0xFF0A0E1A);
+  static const Color surface           = Color(0xFF141927);
   static const Color surfaceVariant    = Color(0x0DFFFFFF);
-  static const Color overlay           = Color(0xFF02060F);
-  static const Color accent            = Color(0xFF4D8BF5);
-  static const Color accentDim         = Color(0x1A4D8BF5);
-  static const Color priceUp           = Color(0xFF34D399);
-  static const Color priceUpDim        = Color(0x1A34D399);
-  static const Color priceDown         = Color(0xFFF87171);
-  static const Color priceDownDim      = Color(0x1AF87171);
+  static const Color overlay           = Color(0xFF0A0E1A);
+  static const Color accent            = Color(0xFF3D7EFF);
+  static const Color accentDim         = Color(0x1F3D7EFF);
+  static const Color priceUp           = Color(0xFF22C55E);
+  static const Color priceUpDim        = Color(0x1F22C55E);
+  static const Color priceDown         = Color(0xFFEF4444);
+  static const Color priceDownDim      = Color(0x1FEF4444);
   static const Color textPrimary       = Color(0xFFF1F5F9);
   static const Color textSecondary     = Color(0xFF94A3B8);
   static const Color textMuted         = Color(0xFF64748B);
   static const Color textDisabled      = Color(0xFF334155);
-  static const Color border            = Color(0x14FFFFFF);
-  static const Color borderMedium      = Color(0x1FFFFFFF);
-  static const Color warning           = Color(0xFFFBBF24);
+  static const Color border            = Color(0xFF1E2D3D);
+  static const Color borderMedium      = Color(0xFF2A3F57);
+  static const Color warning           = Color(0xFFF59E0B);
 
   // Context-aware accessor
   static AppColorsData of(BuildContext context) => AppColorsTheme.of(context);
