@@ -280,8 +280,10 @@ class _FundListTileState extends State<FundListTile>
                         width: double.infinity,
                         height: 42,
                         child: FilledButton.icon(
-                          onPressed: () =>
-                              context.push(AppRoutes.fundDetailPath(fund.id)),
+                          onPressed: () => context.push(
+                              AppRoutes.fundDetailPath(fund.id),
+                              extra: {'code': fund.code, 'category': fund.category},
+                            ),
                           icon: const Icon(IconService.analytics, size: 16),
                           label: const Text('VIEW FUND ANALYSIS'),
                           style: FilledButton.styleFrom(

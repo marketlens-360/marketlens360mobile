@@ -3,7 +3,6 @@ import 'package:marketlens360mobile/core/network/app_exception.dart';
 import 'package:marketlens360mobile/core/theme/app_colors.dart';
 import 'package:marketlens360mobile/core/theme/app_spacing.dart';
 import 'package:marketlens360mobile/core/theme/app_text_styles.dart';
-import 'package:marketlens360mobile/services/icon_service.dart';
 
 class AppErrorView extends StatelessWidget {
   const AppErrorView({
@@ -22,31 +21,64 @@ class AppErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xxl),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xxl,
+          vertical: AppSpacing.xl,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              IconService.error,
-              color: AppColors.textMuted,
-              size: 48,
+            // Icon in colored circle
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: c.priceDown.withAlpha(16),
+                shape: BoxShape.circle,
+                border: Border.all(color: c.priceDown.withAlpha(40), width: 1.5),
+              ),
+              alignment: Alignment.center,
+              child: Icon(Icons.wifi_off_rounded, size: 28, color: c.priceDown),
             ),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.md),
             Text(
-              _message(),
-              style: AppTextStyles.body,
+              'Something went wrong',
+              style: AppTextStyles.labelLg.copyWith(color: c.textPrimary),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: AppSpacing.xl),
-            OutlinedButton(
-              onPressed: onRetry,
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: AppColors.borderMedium),
-                foregroundColor: AppColors.textPrimary,
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              _message(),
+              style: AppTextStyles.body.copyWith(color: c.textMuted),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            SizedBox(
+              width: double.infinity,
+              height: 42,
+              child: FilledButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh_rounded, size: 16),
+                label: const Text('Try Again'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: c.primary,
+                  foregroundColor: Colors.white,
+                  textStyle: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: AppSpacing.buttonRadius,
+                  ),
+                  elevation: 0,
+                ),
               ),
-              child: const Text('Retry'),
             ),
           ],
         ),

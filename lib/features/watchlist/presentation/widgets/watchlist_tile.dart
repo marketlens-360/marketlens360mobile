@@ -36,7 +36,7 @@ class WatchlistTile extends StatelessWidget {
             PriceChangeBadge(value: summary.changePercent!),
         ],
       ),
-      onTap: () => context.push(AppRoutes.stockDetailPath(summary.symbol)),
+      onTap: () => context.push(AppRoutes.stockDetailPath(summary.symbol), extra: summary.sector),
     );
   }
 }

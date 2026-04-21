@@ -80,6 +80,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                 path: ':symbol',
                 builder: (_, state) => StockDetailScreen(
                   symbol: state.pathParameters['symbol']!,
+                  initialSector: state.extra as String?,
                 ),
               ),
             ],
@@ -90,9 +91,14 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: ':id',
-                builder: (_, state) => FundDetailScreen(
-                  fundId: int.parse(state.pathParameters['id']!),
-                ),
+                builder: (_, state) {
+                  final extra = state.extra as Map<String, String?>?;
+                  return FundDetailScreen(
+                    fundId: int.parse(state.pathParameters['id']!),
+                    initialCode: extra?['code'],
+                    initialCategory: extra?['category'],
+                  );
+                },
               ),
             ],
           ),

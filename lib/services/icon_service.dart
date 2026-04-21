@@ -9,7 +9,7 @@ abstract final class IconService {
 
   // ── Drawer Navigation ────────────────────────────────────────────────────────
   static const marketOverview = LucideIcons.layout_dashboard;
-  static const watchlist      = LucideIcons.eye;
+  static const watchlist      = LucideIcons.bookmark;
   static const education      = LucideIcons.graduation_cap;
   static const settings       = LucideIcons.settings;
   static const help           = LucideIcons.help_circle;

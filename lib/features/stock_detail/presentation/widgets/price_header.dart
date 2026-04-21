@@ -40,18 +40,7 @@ class PriceHeader extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
-              if (summary.sector != null)
-                Flexible(
-                  child: Text(
-                    summary.sector!.toUpperCase(),
-                    style: AppTextStyles.sectionLabel.copyWith(
-                      color: c.textMuted,
-                      fontSize: 10,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
+
             ],
           ),
           const SizedBox(height: 8),

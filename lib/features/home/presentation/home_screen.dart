@@ -7,9 +7,10 @@ import 'package:marketlens360mobile/core/theme/app_spacing.dart';
 import 'package:marketlens360mobile/core/theme/app_text_styles.dart';
 import 'package:marketlens360mobile/core/widgets/app_bars.dart';
 import 'package:marketlens360mobile/core/widgets/app_error_view.dart';
-import 'package:marketlens360mobile/core/widgets/price_change_badge.dart';
 import 'package:marketlens360mobile/core/widgets/shimmer_list.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:marketlens360mobile/features/home/providers/home_providers.dart';
+import 'package:marketlens360mobile/features/markets/presentation/widgets/security_list_tile.dart';
 import 'package:marketlens360mobile/services/icon_service.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -268,13 +269,14 @@ class _DiscoveryBento extends ConsumerWidget {
                 iconBorder: c.priceUp.withAlpha(51),
                 iconColor: c.priceUp,
                 label: 'TOP GAINER',
-                title: topGainer?.name ?? topGainer?.symbol ?? 'Loading…',
+                title: topGainer?.name ?? topGainer?.symbol ?? '',
                 subtitle: topGainer?.changePercent != null
                     ? '+${topGainer!.changePercent!.toStringAsFixed(1)}%'
                     : null,
                 subtitleColor: c.priceUp,
+                isLoading: home.isLoading && topGainer == null,
                 onTap: topGainer != null
-                    ? () => context.push(AppRoutes.stockDetailPath(topGainer.symbol))
+                    ? () => context.push(AppRoutes.stockDetailPath(topGainer.symbol), extra: home.sectorFor(topGainer.symbol))
                     : null,
               ),
             ),
@@ -404,6 +406,7 @@ class _SmallBentoCard extends StatelessWidget {
     this.subtitle,
     this.subtitleColor,
     this.onTap,
+    this.isLoading = false,
   });
 
   final IconData iconData;
@@ -415,11 +418,27 @@ class _SmallBentoCard extends StatelessWidget {
   final String? subtitle;
   final Color? subtitleColor;
   final VoidCallback? onTap;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
-    final c      = AppColors.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final c       = AppColors.of(context);
+    final isDark  = Theme.of(context).brightness == Brightness.dark;
+    final base      = isDark ? const Color(0xFF1E2D3D) : const Color(0xFFE2E8F0);
+    final highlight = isDark ? const Color(0xFF2A3F57) : const Color(0xFFF1F5F9);
+
+    Widget shimmerBar(double w, double h) => Shimmer.fromColors(
+          baseColor: base,
+          highlightColor: highlight,
+          child: Container(
+            width: w,
+            height: h,
+            decoration: BoxDecoration(
+              color: base,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        );
 
     return GestureDetector(
       onTap: onTap,
@@ -463,27 +482,33 @@ class _SmallBentoCard extends StatelessWidget {
                 letterSpacing: 1,
               ),
             ),
-            const SizedBox(height: 3),
-            Text(
-              title,
-              style: AppTextStyles.labelLg.copyWith(
-                color: c.textPrimary,
-                fontWeight: FontWeight.w700,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            if (subtitle != null) ...[
-              const SizedBox(height: 2),
-              Text(
-                subtitle!,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: subtitleColor ?? c.textMuted,
-                ),
-              ),
-            ],
+            const SizedBox(height: 6),
+            // Title row — shimmer or real text, same height
+            isLoading
+                ? shimmerBar(88, 16)
+                : Text(
+                    title,
+                    style: AppTextStyles.labelLg.copyWith(
+                      color: c.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+            const SizedBox(height: 4),
+            // Subtitle row — always occupies same height
+            isLoading
+                ? shimmerBar(56, 13)
+                : subtitle != null
+                    ? Text(
+                        subtitle!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: subtitleColor ?? c.textMuted,
+                        ),
+                      )
+                    : const SizedBox(height: 13),
           ],
         ),
       ),
@@ -544,123 +569,58 @@ class _TrendingStocksSection extends ConsumerWidget {
                       ),
                     ],
             ),
-            child: ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: EdgeInsets.zero,
-              itemCount: home.gainers.take(3).length,
-              separatorBuilder: (ctx, i) => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Divider(color: c.border, height: 1),
-              ),
-              itemBuilder: (ctx, i) {
-                final s = home.gainers.elementAt(i);
-                return _TrendingStockRow(
-                  symbol: s.symbol,
-                  name: s.name ?? '',
-                  price: s.closePrice,
-                  changePercent: s.changePercent,
-                );
-              },
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _TrendingStockRow extends StatelessWidget {
-  const _TrendingStockRow({
-    required this.symbol,
-    required this.name,
-    required this.price,
-    required this.changePercent,
-  });
-
-  final String symbol;
-  final String name;
-  final double? price;
-  final double? changePercent;
-
-  static const _avatarColors = [
-    Color(0xFF2563EB),
-    Color(0xFF7C3AED),
-    Color(0xFFDB2777),
-    Color(0xFF0D9488),
-    Color(0xFFD97706),
-  ];
-
-  Color _avatarColor() {
-    final idx = symbol.isNotEmpty ? symbol.codeUnitAt(0) % _avatarColors.length : 0;
-    return _avatarColors[idx];
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final c           = AppColors.of(context);
-    final avatarColor = _avatarColor();
-
-    return InkWell(
-      onTap: () => context.push(AppRoutes.stockDetailPath(symbol)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.screenH,
-          vertical: AppSpacing.md,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: avatarColor.withAlpha(26),
-                shape: BoxShape.circle,
-                border: Border.all(color: avatarColor.withAlpha(51)),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                symbol.isNotEmpty ? symbol[0] : '?',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: avatarColor,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
+            child: ClipRRect(
+              borderRadius: AppSpacing.cardRadius,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    symbol,
-                    style: AppTextStyles.labelLg.copyWith(color: c.textPrimary),
+                  // ── Column header ────────────────────────────────────────
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, 0),
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: c.surfaceContainerLow,
+                      border: Border(bottom: BorderSide(color: c.border, width: 1)),
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          'EQUITY / SYMBOL',
+                          style: AppTextStyles.sectionLabel.copyWith(
+                            color: c.textMuted,
+                            fontSize: 9,
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          'PRICE (KES)  /  24H CHG',
+                          style: AppTextStyles.sectionLabel.copyWith(
+                            color: c.textMuted,
+                            fontSize: 9,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    name,
-                    style: AppTextStyles.labelSm.copyWith(color: c.textMuted),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  // ── Rows ────────────────────────────────────────────────
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: EdgeInsets.zero,
+                    itemCount: home.gainers.take(4).length,
+                    separatorBuilder: (ctx, i) => Divider(color: c.border, height: 1),
+                    itemBuilder: (ctx, i) {
+                      final s = home.gainers.elementAt(i);
+                      return SecurityTileContent(
+                        security: s,
+                        sectorOverride: home.sectorFor(s.symbol),
+                      );
+                    },
                   ),
                 ],
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  price != null ? 'KES ${price!.toStringAsFixed(2)}' : '—',
-                  style: AppTextStyles.priceMedium.copyWith(color: c.textPrimary),
-                ),
-                const SizedBox(height: 3),
-                if (changePercent != null)
-                  PriceChangeBadge(value: changePercent!),
-              ],
-            ),
-          ],
-        ),
-      ),
+          ),
+      ],
     );
   }
 }

@@ -5,6 +5,7 @@ import 'package:marketlens360mobile/core/theme/app_colors.dart';
 import 'package:marketlens360mobile/core/theme/app_spacing.dart';
 import 'package:marketlens360mobile/core/theme/app_text_styles.dart';
 import 'package:marketlens360mobile/core/utils/formatters.dart';
+import 'package:marketlens360mobile/core/widgets/app_bars.dart';
 import 'package:marketlens360mobile/core/widgets/app_card.dart';
 import 'package:marketlens360mobile/core/widgets/app_error_view.dart';
 import 'package:marketlens360mobile/core/widgets/shimmer_list.dart';
@@ -13,40 +14,28 @@ import 'package:marketlens360mobile/services/icon_service.dart';
 import 'widgets/yearly_performance_chart.dart';
 
 class FundDetailScreen extends ConsumerWidget {
-  const FundDetailScreen({super.key, required this.fundId});
+  const FundDetailScreen({
+    super.key,
+    required this.fundId,
+    this.initialCode,
+    this.initialCategory,
+  });
 
   final int fundId;
+  final String? initialCode;
+  final String? initialCategory;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final detail = ref.watch(fundDetailProvider(fundId));
     final c = AppColors.of(context);
+    final category = initialCategory ?? detail.fund?.category;
 
     return Scaffold(
       backgroundColor: c.background,
-      appBar: AppBar(
-        backgroundColor: c.background,
-        elevation: 1,
-        shadowColor: Colors.black.withAlpha(30),
-        surfaceTintColor: Colors.transparent,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, size: 20, color: c.textSecondary),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text(
-          'MarketLens360',
-          style: AppTextStyles.titleSm.copyWith(color: c.primary),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: CircleAvatar(
-              radius: 16,
-              backgroundColor: c.surfaceContainer,
-              child: Icon(IconService.profile, size: 16, color: c.primary),
-            ),
-          ),
-        ],
+      appBar: AppDetailBar(
+        title: initialCode ?? detail.fund?.code ?? detail.fund?.name ?? 'Fund',
+        subtitle: category,
       ),
       body: () {
         if (detail.isLoading && detail.fund == null) {
@@ -72,50 +61,7 @@ class FundDetailScreen extends ConsumerWidget {
               ),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  // ── Breadcrumb + Invest Now ──────────────────────────────────
-                  Row(
-                    children: [
-                      Text(
-                        'FUNDS',
-                        style: AppTextStyles.sectionLabel.copyWith(
-                          color: c.textMuted,
-                          fontSize: 9,
-                        ),
-                      ),
-                      Icon(IconService.chevronRight, size: 12, color: c.textMuted),
-                      Expanded(
-                        child: Text(
-                          (fund.name ?? '—').toUpperCase(),
-                          style: AppTextStyles.sectionLabel.copyWith(
-                            color: c.primary,
-                            fontSize: 9,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      FilledButton.icon(
-                        onPressed: () {},
-                        icon: Icon(IconService.add, size: 16),
-                        label: const Text('Invest Now'),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: c.primary,
-                          foregroundColor: Colors.white,
-                          textStyle: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: AppSpacing.cardRadius,
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 8),
-                          minimumSize: Size.zero,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
 
                   // ── Hero card ────────────────────────────────────────────────
                   AppCard(
@@ -135,7 +81,8 @@ class FundDetailScreen extends ConsumerWidget {
                                 decoration: BoxDecoration(
                                   color: c.surfaceContainerLow,
                                   borderRadius: BorderRadius.circular(
-                                      AppSpacing.radiusLg),
+                                    AppSpacing.radiusLg,
+                                  ),
                                   border: Border.all(color: c.border),
                                 ),
                                 alignment: Alignment.center,
@@ -152,14 +99,16 @@ class FundDetailScreen extends ConsumerWidget {
                                   children: [
                                     Text(
                                       fund.name ?? '—',
-                                      style: AppTextStyles.titleLg
-                                          .copyWith(color: c.textPrimary),
+                                      style: AppTextStyles.titleLg.copyWith(
+                                        color: c.textPrimary,
+                                      ),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
                                       'Asset Class: ${fund.category ?? 'Cash & Equivalents'} • ${fund.riskLevel ?? 'N/A'} Risk',
-                                      style: AppTextStyles.body
-                                          .copyWith(color: c.textSecondary),
+                                      style: AppTextStyles.body.copyWith(
+                                        color: c.textSecondary,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -188,16 +137,15 @@ class FundDetailScreen extends ConsumerWidget {
                                           'CURRENT YIELD (ANNUALIZED)',
                                           style: AppTextStyles.sectionLabel
                                               .copyWith(
-                                            color: c.textMuted,
-                                            fontSize: 9,
-                                          ),
+                                                color: c.textMuted,
+                                                fontSize: 9,
+                                              ),
                                         ),
                                         const SizedBox(height: 4),
                                         Row(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.baseline,
-                                          textBaseline:
-                                              TextBaseline.alphabetic,
+                                          textBaseline: TextBaseline.alphabetic,
                                           children: [
                                             Text(
                                               fund.return1y != null
@@ -205,9 +153,9 @@ class FundDetailScreen extends ConsumerWidget {
                                                   : '—',
                                               style: AppTextStyles.displayMd
                                                   .copyWith(
-                                                color: c.secondary,
-                                                fontSize: 26,
-                                              ),
+                                                    color: c.secondary,
+                                                    fontSize: 26,
+                                                  ),
                                             ),
                                             if (fund.return1m != null) ...[
                                               const SizedBox(width: 6),
@@ -218,23 +166,23 @@ class FundDetailScreen extends ConsumerWidget {
                                                         ? Icons.trending_up
                                                         : Icons.trending_down,
                                                     size: 12,
-                                                    color: (fund.return1m ??
-                                                                    0) >=
+                                                    color:
+                                                        (fund.return1m ?? 0) >=
                                                                 0
-                                                        ? c.secondary
-                                                        : c.priceDown,
+                                                            ? c.secondary
+                                                            : c.priceDown,
                                                   ),
                                                   Text(
                                                     Fmt.pct(fund.return1m),
-                                                    style: AppTextStyles
-                                                        .caption
+                                                    style: AppTextStyles.caption
                                                         .copyWith(
-                                                      color: (fund.return1m ??
-                                                                      0) >=
-                                                                  0
-                                                          ? c.secondary
-                                                          : c.priceDown,
-                                                    ),
+                                                          color:
+                                                              (fund.return1m ??
+                                                                          0) >=
+                                                                      0
+                                                                  ? c.secondary
+                                                                  : c.priceDown,
+                                                        ),
                                                   ),
                                                 ],
                                               ),
@@ -253,15 +201,16 @@ class FundDetailScreen extends ConsumerWidget {
                                         'FUND CURRENCY',
                                         style: AppTextStyles.sectionLabel
                                             .copyWith(
-                                          color: c.textMuted,
-                                          fontSize: 9,
-                                        ),
+                                              color: c.textMuted,
+                                              fontSize: 9,
+                                            ),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
                                         'KES',
-                                        style: AppTextStyles.titleLg
-                                            .copyWith(color: c.textPrimary),
+                                        style: AppTextStyles.titleLg.copyWith(
+                                          color: c.textPrimary,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -286,9 +235,10 @@ class FundDetailScreen extends ConsumerWidget {
                         // Key metrics 2×2 table
                         _MetricsTable(
                           aum: Fmt.kesCompact(fund.aum),
-                          fee: fund.managementFee != null
-                              ? '${fund.managementFee!.toStringAsFixed(1)}% p.a.'
-                              : '—',
+                          fee:
+                              fund.managementFee != null
+                                  ? '${fund.managementFee!.toStringAsFixed(1)}% p.a.'
+                                  : '—',
                           inception: _fmtMonthYear(fund.inceptionDate),
                           minInvest: Fmt.kes(fund.minimumInvestment),
                         ),
@@ -305,8 +255,7 @@ class FundDetailScreen extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Text(
                     'Trailing 12-month annualized yield trends',
-                    style:
-                        AppTextStyles.body.copyWith(color: c.textSecondary),
+                    style: AppTextStyles.body.copyWith(color: c.textSecondary),
                   ),
                   const SizedBox(height: 12),
                   const _PeriodSelector(),
@@ -321,8 +270,9 @@ class FundDetailScreen extends ConsumerWidget {
                       const SizedBox(width: 8),
                       Text(
                         'Investment Objective',
-                        style: AppTextStyles.titleMd
-                            .copyWith(color: c.textPrimary),
+                        style: AppTextStyles.titleMd.copyWith(
+                          color: c.textPrimary,
+                        ),
                       ),
                     ],
                   ),
@@ -350,8 +300,9 @@ class FundDetailScreen extends ConsumerWidget {
                           Expanded(
                             child: Text(
                               item,
-                              style: AppTextStyles.body
-                                  .copyWith(color: c.textPrimary),
+                              style: AppTextStyles.body.copyWith(
+                                color: c.textPrimary,
+                              ),
                             ),
                           ),
                         ],
@@ -363,13 +314,17 @@ class FundDetailScreen extends ConsumerWidget {
                   // ── Fund management ──────────────────────────────────────────
                   Row(
                     children: [
-                      Icon(Icons.person_search_outlined,
-                          size: 18, color: c.primary),
+                      Icon(
+                        Icons.person_search_outlined,
+                        size: 18,
+                        color: c.primary,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'Fund Management',
-                        style: AppTextStyles.titleMd
-                            .copyWith(color: c.textPrimary),
+                        style: AppTextStyles.titleMd.copyWith(
+                          color: c.textPrimary,
+                        ),
                       ),
                     ],
                   ),
@@ -388,12 +343,16 @@ class FundDetailScreen extends ConsumerWidget {
                               decoration: BoxDecoration(
                                 color: c.surfaceContainerLow,
                                 borderRadius: BorderRadius.circular(
-                                    AppSpacing.radiusLg),
+                                  AppSpacing.radiusLg,
+                                ),
                                 border: Border.all(color: c.border),
                               ),
                               alignment: Alignment.center,
-                              child: Icon(IconService.profile,
-                                  size: 36, color: c.textMuted),
+                              child: Icon(
+                                IconService.profile,
+                                size: 36,
+                                color: c.textMuted,
+                              ),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
@@ -402,8 +361,9 @@ class FundDetailScreen extends ConsumerWidget {
                                 children: [
                                   Text(
                                     fund.managerName ?? '—',
-                                    style: AppTextStyles.titleMd
-                                        .copyWith(color: c.textPrimary),
+                                    style: AppTextStyles.titleMd.copyWith(
+                                      color: c.textPrimary,
+                                    ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
@@ -439,8 +399,11 @@ class FundDetailScreen extends ConsumerWidget {
                                 ),
                               ),
                               const SizedBox(width: 4),
-                              Icon(IconService.arrowRight,
-                                  size: 12, color: c.primary),
+                              Icon(
+                                IconService.arrowRight,
+                                size: 12,
+                                color: c.primary,
+                              ),
                             ],
                           ),
                         ),
@@ -497,11 +460,11 @@ class _RiskProfileBar extends StatelessWidget {
   final String? riskLevel;
 
   int get _level => switch ((riskLevel ?? '').toLowerCase()) {
-        'low'    => 1,
-        'medium' => 2,
-        'high'   => 3,
-        _        => 0,
-      };
+    'low' => 1,
+    'medium' => 2,
+    'high' => 3,
+    _ => 0,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -550,43 +513,47 @@ class _MetricsTable extends StatelessWidget {
     final c = AppColors.of(context);
 
     Widget cell(String label, String value) => Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: AppTextStyles.sectionLabel.copyWith(
-                    color: c.textMuted,
-                    fontSize: 8,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: AppTextStyles.titleSm.copyWith(color: c.textPrimary),
-                ),
-              ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: AppTextStyles.sectionLabel.copyWith(
+                color: c.textMuted,
+                fontSize: 8,
+              ),
             ),
-          ),
-        );
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: AppTextStyles.titleSm.copyWith(color: c.textPrimary),
+            ),
+          ],
+        ),
+      ),
+    );
 
     Widget dividerV() => Container(width: 1, height: 56, color: c.border);
 
     return Column(
       children: [
-        Row(children: [
-          cell('ASSETS UNDER MGT', aum),
-          dividerV(),
-          cell('MANAGEMENT FEE', fee),
-        ]),
+        Row(
+          children: [
+            cell('ASSETS UNDER MGT', aum),
+            dividerV(),
+            cell('MANAGEMENT FEE', fee),
+          ],
+        ),
         Divider(color: c.border, height: 1),
-        Row(children: [
-          cell('INCEPTION DATE', inception),
-          dividerV(),
-          cell('MIN. INVESTMENT', minInvest),
-        ]),
+        Row(
+          children: [
+            cell('INCEPTION DATE', inception),
+            dividerV(),
+            cell('MIN. INVESTMENT', minInvest),
+          ],
+        ),
       ],
     );
   }
@@ -623,25 +590,24 @@ class _PeriodSelectorState extends State<_PeriodSelector> {
               duration: const Duration(milliseconds: 150),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               decoration: BoxDecoration(
-                color: isSelected
-                    ? c.surfaceContainerLowest
-                    : Colors.transparent,
+                color:
+                    isSelected ? c.surfaceContainerLowest : Colors.transparent,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: Colors.black.withAlpha(20),
-                          blurRadius: 4,
-                        )
-                      ]
-                    : null,
+                boxShadow:
+                    isSelected
+                        ? [
+                          BoxShadow(
+                            color: Colors.black.withAlpha(20),
+                            blurRadius: 4,
+                          ),
+                        ]
+                        : null,
               ),
               child: Text(
                 _periods[i],
                 style: AppTextStyles.labelMd.copyWith(
                   color: isSelected ? c.primary : c.textMuted,
-                  fontWeight:
-                      isSelected ? FontWeight.w600 : FontWeight.w400,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 ),
               ),
             ),

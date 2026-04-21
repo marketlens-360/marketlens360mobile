@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:marketlens360mobile/core/providers/scaffold_providers.dart';
 import 'package:marketlens360mobile/core/router/app_routes.dart';
 import 'package:marketlens360mobile/core/theme/app_colors.dart';
+import 'package:marketlens360mobile/core/theme/app_spacing.dart';
 import 'package:marketlens360mobile/core/theme/app_text_styles.dart';
 import 'package:marketlens360mobile/services/icon_service.dart';
 
@@ -97,14 +98,17 @@ class AppShellBar extends ConsumerWidget implements PreferredSizeWidget {
 
 /// App bar used on detail / settings screens (Stock Detail, Profile, etc.).
 /// Shows a back arrow, the screen title, and optional trailing actions.
+/// When [subtitle] is provided the title renders as a symbol pill + sector text.
 class AppDetailBar extends StatelessWidget implements PreferredSizeWidget {
   const AppDetailBar({
     super.key,
     required this.title,
+    this.subtitle,
     this.actions,
   });
 
   final String title;
+  final String? subtitle;
   final List<Widget>? actions;
 
   @override
@@ -114,6 +118,44 @@ class AppDetailBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final c      = AppColors.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final titleWidget = subtitle != null
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: c.primaryDim,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+                ),
+                child: Text(
+                  title,
+                  style: AppTextStyles.sectionLabel.copyWith(
+                    color: c.primary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Flexible(
+                child: Text(
+                  subtitle!.toUpperCase(),
+                  style: AppTextStyles.sectionLabel.copyWith(
+                    color: c.textMuted,
+                    fontSize: 10,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          )
+        : Text(
+            title,
+            style: AppTextStyles.screenTitle.copyWith(color: c.textPrimary),
+          );
 
     return _ShadowedBar(
       isDark: isDark,
@@ -137,10 +179,7 @@ class AppDetailBar extends StatelessWidget implements PreferredSizeWidget {
           },
         ),
         titleSpacing: 0,
-        title: Text(
-          title,
-          style: AppTextStyles.screenTitle.copyWith(color: c.textPrimary),
-        ),
+        title: titleWidget,
         actions: actions,
       ),
     );

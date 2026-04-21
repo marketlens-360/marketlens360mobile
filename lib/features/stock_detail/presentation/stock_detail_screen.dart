@@ -17,9 +17,10 @@ import 'widgets/period_selector.dart';
 import 'widgets/price_header.dart';
 
 class StockDetailScreen extends ConsumerWidget {
-  const StockDetailScreen({super.key, required this.symbol});
+  const StockDetailScreen({super.key, required this.symbol, this.initialSector});
 
   final String symbol;
+  final String? initialSector;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -32,6 +33,7 @@ class StockDetailScreen extends ConsumerWidget {
       backgroundColor: c.background,
       appBar: AppDetailBar(
         title: symbol,
+        subtitle: initialSector ?? stock.summary?.sector,
         actions: [
           StreamBuilder<bool>(
             stream: ref.read(stockDetailProvider(symbol)).isInWatchlistStream(symbol),

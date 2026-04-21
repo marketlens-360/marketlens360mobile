@@ -75,7 +75,7 @@ class _TopMoversSectionState extends ConsumerState<TopMoversSection>
                           error: home.error!,
                           onRetry: () => ref.read(homeProvider).refresh(),
                         )
-                      : _MoverList(securities: home.gainers, isGainers: true),
+                      : _MoverList(securities: home.gainers, isGainers: true, sectorFor: home.sectorFor),
               // Losers tab
               home.isLoading && home.losers.isEmpty
                   ? const ShimmerRow()
@@ -84,7 +84,7 @@ class _TopMoversSectionState extends ConsumerState<TopMoversSection>
                           error: home.error!,
                           onRetry: () => ref.read(homeProvider).refresh(),
                         )
-                      : _MoverList(securities: home.losers, isGainers: false),
+                      : _MoverList(securities: home.losers, isGainers: false, sectorFor: home.sectorFor),
             ],
           ),
         ),
@@ -153,10 +153,15 @@ class _TabPill extends StatelessWidget {
 
 // ── Mover list ─────────────────────────────────────────────────────────────────
 class _MoverList extends StatelessWidget {
-  const _MoverList({required this.securities, required this.isGainers});
+  const _MoverList({
+    required this.securities,
+    required this.isGainers,
+    required this.sectorFor,
+  });
 
   final List securities;
   final bool isGainers;
+  final String? Function(String) sectorFor;
 
   @override
   Widget build(BuildContext context) {
@@ -175,23 +180,28 @@ class _MoverList extends StatelessWidget {
       itemBuilder: (context, i) {
         final s = securities[i];
         final isLast = i == securities.length - 1;
-        return _MoverRow(security: s, isLast: isLast);
+        return _MoverRow(security: s, isLast: isLast, sectorFor: sectorFor);
       },
     );
   }
 }
 
 class _MoverRow extends StatelessWidget {
-  const _MoverRow({required this.security, required this.isLast});
+  const _MoverRow({
+    required this.security,
+    required this.isLast,
+    required this.sectorFor,
+  });
 
   final dynamic security;
   final bool isLast;
+  final String? Function(String) sectorFor;
 
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     return InkWell(
-      onTap: () => context.push(AppRoutes.stockDetailPath(security.symbol)),
+      onTap: () => context.push(AppRoutes.stockDetailPath(security.symbol), extra: sectorFor(security.symbol)),
       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       child: Container(
         padding: const EdgeInsets.symmetric(

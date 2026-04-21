@@ -219,10 +219,9 @@ class MarketsScreen extends ConsumerWidget {
                     mainAxisSize: MainAxisSize.max,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.screenH,
-                          vertical: AppSpacing.xs,
-                        ),
+                        // left  = tile margin(16) + tile padding(12) = 28
+                        // right = left(28) + gap(6) + chevron(20)   = 54
+                        padding: const EdgeInsets.fromLTRB(28, 4, 16, 4),
                         child: Row(
                           children: [
                             Expanded(
@@ -234,27 +233,13 @@ class MarketsScreen extends ConsumerWidget {
                                 ),
                               ),
                             ),
-                            SizedBox(
-                              width: 90,
-                              child: Text(
-                                'PRICE (KES)',
-                                style: AppTextStyles.sectionLabel.copyWith(
-                                  color: c.textMuted,
-                                  fontSize: 9,
-                                ),
-                                textAlign: TextAlign.right,
+                            Text(
+                              'PRICE (KES)  /  24H CHG',
+                              style: AppTextStyles.sectionLabel.copyWith(
+                                color: c.textMuted,
+                                fontSize: 9,
                               ),
-                            ),
-                            SizedBox(
-                              width: 72,
-                              child: Text(
-                                '24H CHG',
-                                style: AppTextStyles.sectionLabel.copyWith(
-                                  color: c.textMuted,
-                                  fontSize: 9,
-                                ),
-                                textAlign: TextAlign.right,
-                              ),
+                              textAlign: TextAlign.right,
                             ),
                           ],
                         ),

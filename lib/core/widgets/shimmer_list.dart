@@ -57,7 +57,10 @@ class ShimmerList extends StatelessWidget {
     return Shimmer.fromColors(
       baseColor: base,
       highlightColor: highlight,
-      child: Column(children: children),
+      child: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        child: Column(children: children),
+      ),
     );
   }
 }

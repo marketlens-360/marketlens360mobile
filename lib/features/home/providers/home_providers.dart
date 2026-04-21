@@ -25,6 +25,7 @@ class HomeNotifier extends ChangeNotifier {
   List<MarketIndex> _indices = [];
   List<Security> _gainers = [];
   List<Security> _losers = [];
+  Map<String, String?> _sectorMap = {};
 
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -32,6 +33,8 @@ class HomeNotifier extends ChangeNotifier {
   List<MarketIndex> get indices => _indices;
   List<Security> get gainers => _gainers;
   List<Security> get losers => _losers;
+
+  String? sectorFor(String symbol) => _sectorMap[symbol];
 
   Future<void> load() async {
     if (_isLoading) return;
@@ -49,9 +52,18 @@ class HomeNotifier extends ChangeNotifier {
       _gainers = results[1] as List<Security>;
       _losers  = results[2] as List<Security>;
       _error   = null;
-      // Market overview uses a different schema — non-critical.
+      // Market overview — non-critical, load in background.
       _repo.getMarketOverview()
           .then((v) { if (!_disposed) { _overview = v; _notifyListeners(); } })
+          .catchError((_) {});
+      // Sector map — enrich gainers/losers with sector data in background.
+      _repo.getSecurities()
+          .then((list) {
+            if (!_disposed) {
+              _sectorMap = {for (final s in list) s.symbol: s.sector};
+              _notifyListeners();
+            }
+          })
           .catchError((_) {});
     } catch (e) {
       if (_disposed) return;
